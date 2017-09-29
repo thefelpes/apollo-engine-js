@@ -15,6 +15,13 @@ describe('hapi middleware', () => {
       port: 0
     });
 
+    server.route({
+      method: 'OPTIONS',
+      path: '/graphql',
+      handler: (req, reply) => {
+        return reply('ok');
+      }
+    });
     server.register({
       register: graphqlHapi,
       options: {
@@ -65,7 +72,7 @@ describe('hapi middleware', () => {
         // Then start engine:
         let engine = new Engine({
           engineConfig: {
-            apiKey: "faked",
+            apiKey: "faked"
           },
           graphqlPort: port
         });
@@ -87,16 +94,13 @@ describe('hapi middleware', () => {
       verifyEndpointError(url, done);
     });
 
-    // TODO: validating behaviour when a specific bug is triggered
-    // This test is useless in the long term
-    it('processes empty request', (done) => {
-      request.post({
-        url,
-        body: ''
-      }, function (err, response, body) {
-        body = JSON.parse(response.body);
-        assert.strictEqual('The query failed!', body['errors'][0]['message']);
-        verifyEndpointSuccess(url, false, done);
+    it('ignores options request', (done) => {
+      request({
+        method: 'OPTIONS',
+        url
+      }, (err, response, body) => {
+        assert.strictEqual(200, response.statusCode)
+        done();
       });
     });
   });
