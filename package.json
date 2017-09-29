@@ -1,0 +1,47 @@
+{
+  "name": "apollo-engine",
+  "version": "0.4.2",
+  "description": "Sideload Apollo Engine in front of your graphql server",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "scripts": {
+    "clean": "rm -rf lib",
+    "compile": "tsc",
+    "watch": "tsc -w",
+    "prepare": "npm run clean && npm run compile",
+    "pretest": "tsc",
+    "test": "mocha"
+  },
+  "license": "SEE LICENSE IN LICENSE.md",
+  "repository": "https://github.com/apollographql/apollo-engine-js",
+  "author": "Apollo <apollo@apollodata.com>",
+  "engines": {
+    "node": ">=4.0"
+  },
+  "dependencies": {
+    "request": "^2.81.0",
+    "stream-line-wrapper": "^0.1.1"
+  },
+  "optionalDependencies": {
+    "apollo-engine-binary-darwin": "^0.2017.9-112-gedf90fef",
+    "apollo-engine-binary-linux": "^0.2017.9-112-gedf90fef",
+    "apollo-engine-binary-windows": "^0.2017.9-112-gedf90fef"
+  },
+  "devDependencies": {
+    "@types/express": "^4.0.36",
+    "@types/graphql": "^0.9.2",
+    "@types/hapi": "^16.1.9",
+    "@types/koa": "^2.0.39",
+    "@types/node": "^8.0.14",
+    "@types/request": "^2.0.0",
+    "apollo-server-express": "^1.1.2",
+    "apollo-server-hapi": "^1.1.2",
+    "body-parser": "^1.18.1",
+    "chai": "^4.1.2",
+    "express": "^4.15.4",
+    "graphql": "^0.11.3",
+    "hapi": "^16.6.0",
+    "mocha": "^3.5.3",
+    "typescript": "^2.4.1"
+  }
+}
