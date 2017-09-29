@@ -41,9 +41,7 @@ This is the minimum necessary information in the engine configuration object to 
 
 ```json
 {
-  "reporting": {
-    "apiKey": "service:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-  }
+  "apiKey": "service:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 }
 ```
 
@@ -51,11 +49,11 @@ This is the minimum necessary information in the engine configuration object to 
 The following is an exhaustive configuration showing all the available keys and their default values
 ```json
 {
+  "apiKey": "service:mdg-private-starwars-caching-test:l9VBHi_4k8WXpr5-IGJERA",
   "logcfg": {
     "level": "DEBUG"
   },
   "reporting": {
-    "apiKey": "service:mdg-private-starwars-caching-test:l9VBHi_4k8WXpr5-IGJERA",
     "endpointUrl": "https://optics-staging-report.apollodata.com"
   },
   "stores": [
