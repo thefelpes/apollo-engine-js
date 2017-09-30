@@ -5,7 +5,7 @@ const {assert} = require('chai');
 const request = require('request-promise-native');
 const {Engine} = require('../lib/index');
 const {schema, rootValue, verifyEndpointSuccess, verifyEndpointFailure, verifyEndpointError} = require('./schema');
-const {startWithDelay} = require('./test');
+const {startWithDelay, testEngine} = require('./test');
 
 describe('hapi middleware', () => {
   let server;
@@ -63,12 +63,8 @@ describe('hapi middleware', () => {
       url = `http://localhost:${port}/graphql`;
 
       // Then start engine:
-      let engine = new Engine({
-        engineConfig: {
-          apiKey: 'faked'
-        },
-        graphqlPort: port
-      });
+      let engine = testEngine();
+      engine.graphqlPort = port;
       engine.instrumentHapiServer(server);
       await startWithDelay(engine);
     });
