@@ -37,7 +37,7 @@ export interface EngineConfig {
                 {
                     url: string
                 }
-                ]
+            ]
         }
         ],
     operations?: [
@@ -49,7 +49,7 @@ export interface EngineConfig {
                     ttl: number,
                     store: string
                 }
-                ]
+            ]
         }
         ],
     origins?: [
