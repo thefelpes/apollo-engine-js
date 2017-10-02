@@ -31,11 +31,6 @@ engine.stop();
 
 The graphql server should have tracing enabled if available. If you are using Apollo Server (v1.1.0 or newer), enable the tracing: true configuration option.
 
-# Full Proxy Configuration
-In addition to `engineConfig`, the configuration object can have the following fields:
-- `endpoint`: Your graphql endpoint ('/graphql' by default)
-- `graphqlPort`: The port that your graphql server is running on (`process.env.PORT` by default)
-
 # Minimum Engine Configuration
 This is the minimum necessary information in the engine configuration object to enable sending tracing and telemetry information.
 
@@ -47,7 +42,7 @@ This is the minimum necessary information in the engine configuration object to 
 
 # Full Engine Configuration
 The following is a sample configuration showing all the available keys and their default values.
-For more information, see the documentation section on (configuring the proxy)[http://engine-docs.apollographql.com/setup-node.html#\32 -Configure-the-Proxy]
+For more information, see the documentation section on [configuring the proxy](http://engine-docs.apollographql.com/setup-node.html#\32 -Configure-the-Proxy)
 ```json
 {
   "apiKey": "service:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
