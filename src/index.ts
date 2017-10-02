@@ -19,7 +19,11 @@ export type LogLevels = 'debug' | 'info' | 'warn' | 'error' | 'fatal';
 export interface EngineConfig {
     apiKey: string,
     reporting?: {
-        endpointUrl?: string
+        endpointUrl?: string,
+        maxAttempts?: number,
+        retryMinimum?: string,
+        retryMaximum?: string,
+        debugReports?: boolean
     },
     logcfg?: {
         level: LogLevels
@@ -33,7 +37,7 @@ export interface EngineConfig {
                 {
                     url: string
                 }
-                ]
+            ]
         }
         ],
     operations?: [
@@ -45,7 +49,7 @@ export interface EngineConfig {
                     ttl: number,
                     store: string
                 }
-                ]
+            ]
         }
         ],
     origins?: [

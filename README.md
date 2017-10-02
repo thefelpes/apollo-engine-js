@@ -31,11 +31,6 @@ engine.stop();
 
 The graphql server should have tracing enabled if available. If you are using Apollo Server (v1.1.0 or newer), enable the tracing: true configuration option.
 
-# Full Proxy Configuration
-In addition to `engineConfig`, the configuration object can have the following fields:
-- `endpoint`: Your graphql endpoint ('/graphql' by default)
-- `graphqlPort`: The port that your graphql server is running on (`process.env.PORT` by default)
-
 # Minimum Engine Configuration
 This is the minimum necessary information in the engine configuration object to enable sending tracing and telemetry information.
 
@@ -46,74 +41,33 @@ This is the minimum necessary information in the engine configuration object to 
 ```
 
 # Full Engine Configuration
-The following is an exhaustive configuration showing all the available keys and their default values
+The following is a sample configuration showing all the available keys and their default values.
+For more information, see the documentation section on [configuring the proxy](http://engine-docs.apollographql.com/setup-node.html)
 ```json
 {
-  "apiKey": "service:mdg-private-starwars-caching-test:l9VBHi_4k8WXpr5-IGJERA",
+  "apiKey": "service:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
   "logcfg": {
     "level": "DEBUG"
   },
+  "origins": [
+    {
+      "url": "http://localhost:3000/graphql"
+    }
+  ],
+  "frontends": [
+    {
+      "host": "127.0.0.1",
+      "port": 3001,
+      "endpoint": "/graphql"
+    }
+  ],
   "reporting": {
-    "endpointUrl": "https://optics-staging-report.apollodata.com"
+    "debugReports": false,
   },
-  "stores": [
-    {
-      "name": "standardCache",
-      "salt": "V0FagaqZIl",
-      "epoch": 2,
-      "timeout": "1s",
-      "memcaches": [
-        {
-          "url": "localhost:11211"
-        }
-      ]
-    },
-    {
-      "name": "embeddedCache",
-      "salt": "hDe87famf",
-      "epoch": 0,
-      "cacheSize": 1048576
-    }
-  ],
-  "operations": [
-    {
-      "signature": "query hero{hero{name}}",
-      "caches": [
-        {
-          "perSession": false,
-          "ttl": 600,
-          "store": "standardCache"
-        }
-      ]
-    },
-    {
-      "signature": "{hero{name}}",
-      "caches": [
-        {
-          "perSession": false,
-          "ttl": 5,
-          "store": "embeddedCache"
-        }
-      ]
-    }
-  ],
   "sessionAuth": {
     "store": "standardCache",
     "header": "X-AUTH-TOKEN",
     "tokenAuthUrl": "http://session-server.com/auth-path"
-  },
-  "rateLimiting": {
-    "maxCredits": 2000,
-    "defaultCost": 1,
-    "types": [
-      {
-        "name": "Droid",
-        "cost": 500
-      }
-    ],
-    "bucketInterval": "1s",
-    "numBuckets": 5,
-    "store": "standardCache"
   }
 }
 ```
@@ -125,4 +79,4 @@ In order to ascertain a user's eligibility to access their session cache, an end
   - `.header` describes the header that should contain the session token
   - `.tokenAuthUrl` describes the endpoint name on the origin server which should receive the token in the POST body and respond with:
     - `200 OK` and JSON body `{ "ttl": 3000 }` when the token is valid
-    - `403 Forbidden` and if not
+    - `403 Forbidden` if not
