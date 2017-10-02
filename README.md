@@ -62,7 +62,6 @@ For more information, see the documentation section on [configuring the proxy](h
     }
   ],
   "reporting": {
-    "endpointUrl": "https://optics-staging-report.apollodata.com",
     "debugReports": false,
   },
   "sessionAuth": {
