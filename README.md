@@ -80,4 +80,4 @@ In order to ascertain a user's eligibility to access their session cache, an end
   - `.header` describes the header that should contain the session token
   - `.tokenAuthUrl` describes the endpoint name on the origin server which should receive the token in the POST body and respond with:
     - `200 OK` and JSON body `{ "ttl": 3000 }` when the token is valid
-    - `403 Forbidden` and if not
+    - `403 Forbidden` if not
