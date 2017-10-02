@@ -42,7 +42,7 @@ This is the minimum necessary information in the engine configuration object to 
 
 # Full Engine Configuration
 The following is a sample configuration showing all the available keys and their default values.
-For more information, see the documentation section on [configuring the proxy](http://engine-docs.apollographql.com/setup-node.html#\32 -Configure-the-Proxy)
+For more information, see the documentation section on [configuring the proxy](http://engine-docs.apollographql.com/setup-node.html)
 ```json
 {
   "apiKey": "service:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
