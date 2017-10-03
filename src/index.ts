@@ -1,8 +1,8 @@
-import {ChildProcess, execFile} from 'child_process';
-import {randomBytes} from 'crypto';
-import {createServer} from 'net';
-import {resolve} from 'path';
-import {readFileSync, existsSync} from 'fs';
+import { ChildProcess, execFile } from 'child_process';
+import { randomBytes } from 'crypto';
+import { createServer } from 'net';
+import { resolve } from 'path';
+import { readFileSync, existsSync } from 'fs';
 
 import {
     MiddlewareParams,
@@ -39,7 +39,7 @@ export interface EngineConfig {
                 }
             ]
         }
-        ],
+    ],
     operations?: [
         {
             signature: string,
@@ -51,21 +51,21 @@ export interface EngineConfig {
                 }
             ]
         }
-        ],
+    ],
     origins?: [
         {
             url: string,
             requestTimeout?: string,
             headerSecret: string,
         }
-        ],
+    ],
     frontends?: [
         {
             host: string,
             endpoint: string,
             port: number,
         }
-        ],
+    ],
     sessionAuth?: {
         header: string,
         store?: string,
@@ -169,13 +169,19 @@ export class Engine {
                     binaryPath = resolve(__dirname, '../../../node_modules', this.binary);
                 }
 
-                const env = {'env': Object.assign({'ENGINE_CONFIG': JSON.stringify(childConfig)}, process.env)};
+                const env = { 'env': Object.assign({ 'ENGINE_CONFIG': JSON.stringify(childConfig) }, process.env) };
                 let child = execFile(binaryPath, ['-config=env', '-restart=true'], env);
                 child.stdout.pipe(this.engineLineWrapper()).pipe(process.stdout);
                 child.stderr.pipe(this.engineLineWrapper()).pipe(process.stderr);
-                child.on('exit', () => {
+                child.on('exit', (code, signal) => {
                     if (child != null) {
-                        throw new Error('Engine crashed unexpectedly')
+                        if (code != null) {
+                            throw new Error(`Engine crashed unexpectedly with code: ${code}`)
+                        }
+                        if (signal != null) {
+                            throw new Error(`Engine was killed unexpectedly by signal: ${signal}`)
+                        }
+                        throw new Error("Engine crashed unexpectedly")
                     }
                 });
                 resultPort(port);
@@ -184,7 +190,7 @@ export class Engine {
     }
 
     private engineLineWrapper(): any {
-        return new LineWrapper({prefix: 'EngineProxy ==> '});
+        return new LineWrapper({ prefix: 'EngineProxy ==> ' });
     }
 
     public expressMiddleware(): (req: any, res: any, next: any) => void {
