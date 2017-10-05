@@ -1,4 +1,4 @@
-import { ChildProcess, execFile } from 'child_process';
+import { ChildProcess, spawn } from 'child_process';
 import { randomBytes } from 'crypto';
 import { createServer } from 'net';
 import { resolve } from 'path';
@@ -169,8 +169,11 @@ export class Engine {
                     binaryPath = resolve(__dirname, '../../../node_modules', this.binary);
                 }
 
-                const env = { 'env': Object.assign({ 'ENGINE_CONFIG': JSON.stringify(childConfig) }, process.env) };
-                let child = execFile(binaryPath, ['-config=env', '-restart=true'], env);
+                const childOptions = {
+                    'env': Object.assign({'ENGINE_CONFIG': JSON.stringify(childConfig)}, process.env),
+                    'maxBuffer': 5 * 1024 * 1024
+                };
+                let child = spawn(binaryPath, ['-config=env', '-restart=true'], childOptions);
                 child.stdout.pipe(this.engineLineWrapper()).pipe(process.stdout);
                 child.stderr.pipe(this.engineLineWrapper()).pipe(process.stderr);
                 child.on('exit', (code, signal) => {
