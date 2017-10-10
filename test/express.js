@@ -158,7 +158,10 @@ describe('express middleware', () => {
               host: '127.0.0.1',
               endpoint: '/graphql',
               port: extraPort
-            }]
+            }],
+            reporting: {
+              noTraceVariables: true
+            }
           },
           graphqlPort: 1
         });

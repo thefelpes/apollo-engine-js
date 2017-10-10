@@ -23,7 +23,8 @@ export interface EngineConfig {
         maxAttempts?: number,
         retryMinimum?: string,
         retryMaximum?: string,
-        debugReports?: boolean
+        debugReports?: boolean,
+        noTraceVariables?: boolean
     },
     logcfg?: {
         level: LogLevels
