@@ -10,7 +10,9 @@
     "watch": "tsc -w",
     "prepare": "npm run clean && npm run compile",
     "pretest": "tsc",
-    "test": "mocha"
+    "test": "mocha",
+    "pretravis": "npm run compile",
+    "travis": "istanbul cover _mocha -- --timeout 5000 --full-trace ./test/*.js"
   },
   "license": "SEE LICENSE IN LICENSE.md",
   "repository": "https://github.com/apollographql/apollo-engine-js",
@@ -43,6 +45,7 @@
     "express": "^4.15.4",
     "graphql": "^0.11.3",
     "hapi": "^16.6.0",
+    "istanbul": "1.1.0-alpha.1",
     "koa": "^2.3.0",
     "koa-bodyparser": "^4.2.0",
     "koa-router": "^7.2.1",

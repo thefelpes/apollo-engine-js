@@ -19,3 +19,4 @@ pids
 
 # npm packs
 apollo-engine*.tgz
+coverage/

@@ -1,4 +1,8 @@
 # Apollo Engine
+
+[![npm version](https://badge.fury.io/js/apollo-engine.svg)](https://badge.fury.io/js/apollo-engine)
+[![Build Status](https://travis-ci.org/apollographql/apollo-engine-js.svg?branch=master)](https://travis-ci.org/apollographql/apollo-engine-js)
+
 This package integrates the Apollo Engine proxy with your GraphQL server.
 
 When installed, it starts the Apollo Engine proxy in a new process, then routes
