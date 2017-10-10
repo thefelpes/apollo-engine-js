@@ -25,9 +25,9 @@
     "stream-line-wrapper": "^0.1.1"
   },
   "optionalDependencies": {
-    "apollo-engine-binary-darwin": "^0.2017.10-14-g7e093b8a",
-    "apollo-engine-binary-linux": "^0.2017.10-14-g7e093b8a",
-    "apollo-engine-binary-windows": "^0.2017.10-14-g7e093b8a"
+    "apollo-engine-binary-darwin": "^0.2017.10-19-gdc8304d2",
+    "apollo-engine-binary-linux": "^0.2017.10-19-gdc8304d2",
+    "apollo-engine-binary-windows": "^0.2017.10-19-gdc8304d2"
   },
   "devDependencies": {
     "@types/express": "^4.0.36",
