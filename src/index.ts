@@ -29,44 +29,40 @@ export interface EngineConfig {
     logcfg?: {
         level: LogLevels
     },
-    stores?: [
-        {
-            name: string,
-            epoch?: number,
-            timeout?: string,
-            memcaches: [
-                {
-                    url: string
-                }
-            ]
-        }
-    ],
-    operations?: [
-        {
-            signature: string,
-            perSession?: boolean,
-            caches: [
-                {
-                    ttl: number,
-                    store: string
-                }
-            ]
-        }
-    ],
-    origins?: [
-        {
-            url: string,
-            requestTimeout?: string,
-            headerSecret: string,
-        }
-    ],
-    frontends?: [
-        {
-            host: string,
-            endpoint: string,
-            port: number,
-        }
-    ],
+    stores?: {
+        name: string,
+        epoch?: number,
+        timeout?: string,
+        memcaches: [
+            {
+                url: string
+            }
+        ]
+    }[]
+    ,
+    operations?: {
+        signature: string,
+        perSession?: boolean,
+        caches: [
+            {
+                ttl: number,
+                store: string
+            }
+        ]
+    }[]
+    ,
+    origins?: {
+        url: string,
+        requestTimeout?: string,
+        headerSecret: string,
+    }[]
+    ,
+    frontends?: {
+        host: string,
+        endpoint: string,
+        port: number,
+    }[]
+    ,
     sessionAuth?: {
         header: string,
         store?: string,
@@ -155,14 +151,16 @@ export class Engine {
                     childConfig.frontends.push(frontend);
                 }
 
-                let origin = {
-                    url: 'http://127.0.0.1:' + graphqlPort + endpoint,
-                    headerSecret: this.middlewareParams.psk
-                };
                 if (typeof childConfig.origins === 'undefined') {
-                    childConfig.origins = [origin];
+                    childConfig.origins = [{
+                        url: 'http://127.0.0.1:' + graphqlPort + endpoint,
+                        headerSecret: this.middlewareParams.psk
+                    }];
                 } else {
-                    childConfig.origins.push(origin)
+                    childConfig.origins = childConfig.origins.map(origin => ({
+                        ...origin,
+                        headerSecret: this.middlewareParams.psk
+                    }));
                 }
 
                 let binaryPath = resolve(__dirname, '../node_modules', this.binary);
