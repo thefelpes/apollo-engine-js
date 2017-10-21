@@ -6,16 +6,28 @@ const {createServer} = require('net');
 
 const request = require('request-promise-native');
 const {assert} = require('chai');
+const isRunning = require('is-running');
 
 const {Engine} = require('../lib/index');
 const {schema, rootValue, verifyEndpointSuccess, verifyEndpointFailure, verifyEndpointError} = require('./schema');
-const {startWithDelay, testEngine} = require('./test');
+const {startWithDelay, stopWithDelay, testEngine} = require('./test');
 
 describe('express middleware', () => {
   // Start graphql-express on a random port:
-  let app;
+  let app, engine = null;
   beforeEach(() => {
     app = express();
+  });
+  afterEach(async () => {
+    if (engine && engine.started) {
+      const pid = engine.child.pid;
+      await stopWithDelay(engine);
+      // Make sure that we actually manage to kill the binary.
+      // XXX This only verifies that the outer -restart=true binary is killed, not
+      //     the actual proxy itself.
+      assert.isFalse(isRunning(pid));
+      engine = null;
+    }
   });
 
   function gqlServer(path) {
@@ -34,11 +46,10 @@ describe('express middleware', () => {
   }
 
   function setupEngine(path) {
-    let engine = testEngine(path);
+    engine = testEngine(path);
     app.use(engine.expressMiddleware());
 
     engine.graphqlPort = gqlServer(path);
-    return engine;
   }
 
   describe('without engine', () => {
@@ -60,10 +71,9 @@ describe('express middleware', () => {
 
   describe('with engine', () => {
     // Configure engine middleware:
-    let engine;
     let url;
     beforeEach(() => {
-      engine = setupEngine();
+      setupEngine();
       url = `http://localhost:${engine.graphqlPort}/graphql`;
     });
 
@@ -99,14 +109,14 @@ describe('express middleware', () => {
 
   describe('custom path routing', () => {
     it('allows routing root path through proxy', async () => {
-      let engine = setupEngine('/');
+      setupEngine('/');
       await startWithDelay(engine);
       return verifyEndpointSuccess(`http://localhost:${engine.graphqlPort}/`, false);
     });
 
 
     it('does not route child path through proxy', async () => {
-      let engine = setupEngine();
+      setupEngine();
 
       // Request direct to server works:
       let childUrl = `http://localhost:${engine.graphqlPort}/graphql/ping`;
@@ -128,7 +138,7 @@ describe('express middleware', () => {
   describe('engine config', () => {
     it('allows reading from file proxy', async () => {
       // Install middleware before GraphQL handler:
-      let engine = new Engine({
+      engine = new Engine({
         endpoint: '/graphql',
         engineConfig: 'test/engine.json',
         graphqlPort: 1
@@ -150,7 +160,7 @@ describe('express middleware', () => {
         srv.close();
 
         // Setup engine, with an extra frontend on that port:
-        let engine = new Engine({
+        engine = new Engine({
           endpoint: '/graphql',
           engineConfig: {
             apiKey: 'faked',

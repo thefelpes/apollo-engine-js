@@ -55,7 +55,7 @@ describe('hapi middleware', () => {
   });
 
   describe('with engine', () => {
-    let url;
+    let url, engine;
     beforeEach(async () => {
       await server.start();
 
@@ -63,10 +63,14 @@ describe('hapi middleware', () => {
       url = `http://localhost:${port}/graphql`;
 
       // Then start engine:
-      let engine = testEngine();
+      engine = testEngine();
       engine.graphqlPort = port;
       engine.instrumentHapiServer(server);
       await startWithDelay(engine);
+    });
+
+    afterEach(async () => {
+      engine.stop();
     });
 
     it('processes successful query', () => {

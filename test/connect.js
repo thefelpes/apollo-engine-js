@@ -42,14 +42,18 @@ describe('connect middleware', () => {
   });
 
   describe('with engine', () => {
-    let url;
+    let url, engine;
     beforeEach(async () => {
-      let engine = testEngine();
+      engine = testEngine();
       app.use(engine.connectMiddleware());
       let server = gqlServer();
       engine.graphqlPort = server.address().port;
       await startWithDelay(engine);
       url = `http://localhost:${engine.graphqlPort}/graphql`;
+    });
+
+    afterEach(() => {
+      engine.stop();
     });
 
     it('processes successful query', () => {

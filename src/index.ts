@@ -83,8 +83,12 @@ export class Engine {
     private binary: string;
     private config: string | EngineConfig;
     private middlewareParams: MiddlewareParams;
+    private started: Boolean;
+    private killed: Boolean;
 
     public constructor(config: SideloadConfig) {
+        this.started = false;
+        this.killed = false;
         this.middlewareParams = new MiddlewareParams();
         this.middlewareParams.endpoint = config.endpoint || '/graphql';
         this.middlewareParams.psk = randomBytes(48).toString("hex");
@@ -120,6 +124,10 @@ export class Engine {
     }
 
     public start(): Promise<number> {
+        if (this.started) {
+            throw new Error('Only call start() on an engine object once');
+        }
+        this.started = true;
         let config = this.config;
         const endpoint = this.middlewareParams.endpoint;
         const graphqlPort = this.graphqlPort;
@@ -176,6 +184,10 @@ export class Engine {
                 child.stdout.pipe(this.engineLineWrapper()).pipe(process.stdout);
                 child.stderr.pipe(this.engineLineWrapper()).pipe(process.stderr);
                 child.on('exit', (code, signal) => {
+                    if (this.killed) {
+                        // It's not an error if we think it's our fault.
+                        return;
+                    }
                     if (child != null) {
                         if (code != null) {
                             throw new Error(`Engine crashed unexpectedly with code: ${code}`)
@@ -186,6 +198,7 @@ export class Engine {
                         throw new Error("Engine crashed unexpectedly")
                     }
                 });
+                this.child = child;
                 resultPort(port);
             }).listen(0);
         });
@@ -217,6 +230,7 @@ export class Engine {
         }
         const childRef = this.child;
         this.child = null;
+        this.killed = true;
         childRef.kill();
     }
 }
