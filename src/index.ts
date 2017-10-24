@@ -26,7 +26,7 @@ export interface EngineConfig {
         debugReports?: boolean,
         noTraceVariables?: boolean
     },
-    logcfg?: {
+    logging?: {
         level: LogLevels
     },
     stores?: {
@@ -52,9 +52,11 @@ export interface EngineConfig {
     }[]
     ,
     origins?: {
-        url: string,
+        http: {
+            url: string,
+            headerSecret: string,
+        }
         requestTimeout?: string,
-        headerSecret: string,
     }[]
     ,
     frontends?: {
@@ -161,14 +163,18 @@ export class Engine {
 
                 if (typeof childConfig.origins === 'undefined') {
                     childConfig.origins = [{
-                        url: 'http://127.0.0.1:' + graphqlPort + endpoint,
-                        headerSecret: this.middlewareParams.psk
+                        http: {
+                            url: 'http://127.0.0.1:' + graphqlPort + endpoint,
+                            headerSecret: this.middlewareParams.psk
+                        }
                     }];
                 } else {
-                    childConfig.origins = childConfig.origins.map(origin => ({
-                        ...origin,
-                        headerSecret: this.middlewareParams.psk
-                    }));
+                    // Extend any existing HTTP origins with the chosen PSK:
+                    childConfig.origins.forEach(origin => {
+                        if (typeof origin.http === 'object') {
+                            origin.http.headerSecret = this.middlewareParams.psk;
+                        }
+                    })
                 }
 
                 let binaryPath = resolve(__dirname, '../node_modules', this.binary);

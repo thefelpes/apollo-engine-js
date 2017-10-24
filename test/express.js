@@ -160,26 +160,47 @@ describe('express middleware', () => {
         srv.close();
 
         // Setup engine, with an extra frontend on that port:
+        let engineConfig = {
+          apiKey: 'faked',
+          frontends: [{
+            host: '127.0.0.1',
+            endpoint: '/graphql',
+            port: extraPort
+          }],
+          reporting: {
+            noTraceVariables: true
+          }
+        };
         engine = new Engine({
           endpoint: '/graphql',
-          engineConfig: {
-            apiKey: 'faked',
-            frontends: [{
-              host: '127.0.0.1',
-              endpoint: '/graphql',
-              port: extraPort
-            }],
-            reporting: {
-              noTraceVariables: true
-            }
-          },
+          engineConfig,
           graphqlPort: 1
         });
         app.use(engine.expressMiddleware());
 
         let port = gqlServer('/graphql');
-        engine.graphqlPort = port;
+        // Provide origins _before_ starting:
+        engineConfig.origins = [
+          {
+            lambda: {
+              functionArn: 'arn:aws:lambda:us-east-1:1234567890:function:mock_function',
+              awsAccessKeyId: 'foo',
+              awsSecretAccessKey: 'bar'
+            }
+          },
+          {
+            http: {
+              url: `http://localhost:${port}/graphql`
+            }
+          }
+        ];
         await startWithDelay(engine);
+
+        // Non-HTTP origin unchanged:
+        assert.strictEqual(undefined, engineConfig.origins[0].http);
+        // HTTP origin has PSK injected:
+        assert.notEqual(undefined, engineConfig.origins[1].http.headerSecret);
+
         await verifyEndpointSuccess(`http://localhost:${port}/graphql`, false);
         await verifyEndpointSuccess(`http://localhost:${extraPort}/graphql`, false);
         done();

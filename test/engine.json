@@ -1,6 +1,6 @@
 {
   "apiKey": "faked",
-  "logcfg": {
+  "logging": {
     "level": "DEBUG"
   }
 }
