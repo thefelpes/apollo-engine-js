@@ -31,7 +31,7 @@ export function makeConnectMiddleware(params: MiddlewareParams) {
 
 export function makeKoaMiddleware(params: MiddlewareParams) {
     return function (ctx: Context, next: () => Promise<any>) {
-        if (!params.uri || ctx.originalUrl != params.endpoint) return next();
+        if (!params.uri || ctx.path != params.endpoint) return next();
         else if (ctx.req.headers['x-engine-from'] === params.psk) return next();
         else if (ctx.req.method != 'GET' && ctx.req.method != 'POST') return next();
         else return new Promise((resolve) => {
