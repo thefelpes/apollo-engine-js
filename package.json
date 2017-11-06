@@ -12,7 +12,8 @@
     "pretest": "tsc",
     "test": "mocha",
     "pretravis": "npm run compile",
-    "travis": "istanbul cover _mocha -- --timeout 5000 --full-trace ./test/*.js"
+    "travis": "istanbul cover _mocha -- --timeout 5000 --full-trace ./test/*.js",
+    "lint": "tslint -p tsconfig.json src/*.ts"
   },
   "license": "SEE LICENSE IN LICENSE.md",
   "repository": "https://github.com/apollographql/apollo-engine-js",
@@ -52,6 +53,7 @@
     "koa-router": "^7.2.1",
     "mocha": "^3.5.3",
     "request-promise-native": "^1.0.5",
+    "tslint": "^5.8.0",
     "typescript": "^2.4.1"
   }
 }

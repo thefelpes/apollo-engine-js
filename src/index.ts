@@ -16,59 +16,61 @@ const LineWrapper = require('stream-line-wrapper');
 
 export type LogLevels = 'debug' | 'info' | 'warn' | 'error' | 'fatal';
 
+export interface AccessLogConfig {
+    destination: string,
+    requestHeaders?: string[],
+    responseHeaders?: string[],
+}
+
 export interface EngineConfig {
     apiKey: string,
+    origins?: {
+        http: {
+            url: string,
+            headerSecret: string,
+        }
+        requestTimeout?: string ,
+        maxConcurrentRequests?: number,
+    }[],
+    frontends?: {
+        host: string,
+        endpoint: string,
+        port: number,
+    }[],
+    stores?: {
+        name: string,
+        memcache?: {
+            url: string[],
+            timeout?: string,
+            keyPrefix?: string,
+        },
+        inMemory?: {
+            cacheSize?: number
+        },
+    }[],
+    sessionAuth?: {
+        header?: string,
+        cookie?: string,
+        tokenAuthUrl?: string
+        store?: string,
+    },
+    logging?: {
+        level?: LogLevels,
+        request?: AccessLogConfig,
+        query?: AccessLogConfig,
+    },
     reporting?: {
         endpointUrl?: string,
         maxAttempts?: number,
         retryMinimum?: string,
         retryMaximum?: string,
         debugReports?: boolean,
-        noTraceVariables?: boolean
+        noTraceVariables?: boolean,
+        privateHeaders?: string[],
     },
-    logging?: {
-        level: LogLevels
-    },
-    stores?: {
-        name: string,
-        epoch?: number,
-        timeout?: string,
-        memcaches: [
-            {
-                url: string
-            }
-        ]
-    }[]
-    ,
-    operations?: {
-        signature: string,
-        perSession?: boolean,
-        caches: [
-            {
-                ttl: number,
-                store: string
-            }
-        ]
-    }[]
-    ,
-    origins?: {
-        http: {
-            url: string,
-            headerSecret: string,
-        }
-        requestTimeout?: string,
-    }[]
-    ,
-    frontends?: {
-        host: string,
-        endpoint: string,
-        port: number,
-    }[]
-    ,
-    sessionAuth?: {
-        header: string,
-        store?: string,
-        tokenAuthUrl?: string
+    queryCache: {
+        publicFullQueryStore?: string,
+        privateFullQueryStore?: string,
     }
 }
 
@@ -210,10 +212,6 @@ export class Engine {
         });
     }
 
-    private engineLineWrapper(): any {
-        return new LineWrapper({ prefix: 'EngineProxy ==> ' });
-    }
-
     public expressMiddleware(): (req: any, res: any, next: any) => void {
         return makeExpressMiddleware(this.middlewareParams);
     }
@@ -238,5 +236,9 @@ export class Engine {
         this.child = null;
         this.killed = true;
         childRef.kill();
+    }
+
+    private engineLineWrapper(): any {
+        return new LineWrapper({ prefix: 'EngineProxy ==> ' });
     }
 }
