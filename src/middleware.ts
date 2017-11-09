@@ -2,7 +2,7 @@ import {Request, Response, NextFunction} from 'express'
 import {Context} from 'koa'
 import {Server} from 'hapi'
 import * as request from 'request'
-import {IncomingMessage, ServerResponse} from "http";
+import {IncomingMessage, ServerResponse} from 'http';
 
 export class MiddlewareParams {
     public endpoint: string;
@@ -21,8 +21,9 @@ export function makeExpressMiddleware(params: MiddlewareParams) {
 }
 
 export function makeConnectMiddleware(params: MiddlewareParams) {
+    const endpointRegex = new RegExp(`^${params.endpoint}(\\?.*)?$`);
     return function (req: any, res: any, next: any) {
-        if (!params.uri || req.originalUrl !== params.endpoint) next();
+        if (!params.uri || !endpointRegex.test(req.originalUrl)) next();
         else if (req.method !== 'GET' && req.method !== 'POST') next();
         else if (req.headers['x-engine-from'] === params.psk) next();
         else proxyRequest(params, req, res);
@@ -35,7 +36,7 @@ export function makeKoaMiddleware(params: MiddlewareParams) {
         else if (ctx.req.headers['x-engine-from'] === params.psk) return next();
         else if (ctx.req.method !== 'GET' && ctx.req.method !== 'POST') return next();
         else return new Promise((resolve) => {
-                ctx.req.pipe(request(params.uri + params.endpoint, (error, response, body) => {
+                ctx.req.pipe(request(params.uri + ctx.originalUrl, (error, response, body) => {
                     if (response.statusCode) ctx.response.status = response.statusCode;
                     ctx.response.set(JSON.parse(JSON.stringify(response.headers)));
                     ctx.response.body = body;
@@ -49,7 +50,7 @@ export function makeKoaMiddleware(params: MiddlewareParams) {
 export function instrumentHapi(server: Server, params: MiddlewareParams) {
     server.ext('onRequest', (req, reply) => {
         if (!params.uri) return reply.continue();
-        const path = req.url.path;
+        const path = req.url.pathname;
         if (!path || path !== params.endpoint) return reply.continue();
         else if (req.method !== 'get' && req.method !== 'post') return reply.continue();
         else if (req.headers['x-engine-from'] === params.psk) return reply.continue();
@@ -62,7 +63,7 @@ function proxyRequest(params: MiddlewareParams, req: IncomingMessage, res: Serve
         req.pipe(process.stdout);
     }
 
-    let proxyRes = req.pipe(request(params.uri + params.endpoint));
+    let proxyRes = req.pipe(request(params.uri + req.url));
     if (params.dumpTraffic) {
         proxyRes.pipe(process.stdout);
     }

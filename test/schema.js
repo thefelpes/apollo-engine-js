@@ -70,3 +70,22 @@ exports.verifyEndpointError = (url) => {
     });
   });
 };
+
+exports.verifyEndpointGet = (url, hasTracing) => {
+  return new Promise((resolve) => {
+    let query = '{ hello }';
+    request.get({
+      url: `${url}?query=${encodeURIComponent(query)}`,
+      json: true,
+    }, (err, response, body) => {
+      assert.strictEqual(200, response.statusCode);
+      assert.strictEqual('Hello World', body['data']['hello']);
+      if (hasTracing) {
+        assert.notEqual(undefined, body['extensions'] && body['extensions']['tracing']);
+      } else {
+        assert.strictEqual(undefined, body['extensions'] && body['extensions']['tracing']);
+      }
+      resolve();
+    });
+  });
+};

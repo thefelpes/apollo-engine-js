@@ -1,16 +1,17 @@
 const connect = require('connect');
+const query = require('connect-query');
 const bodyParser = require('body-parser');
 const {graphqlConnect} = require('apollo-server-express');
 const http = require('http');
 
-const {Engine} = require('../lib/index');
-const {schema, rootValue, verifyEndpointSuccess, verifyEndpointFailure, verifyEndpointError} = require('./schema');
+const {schema, rootValue, verifyEndpointSuccess, verifyEndpointFailure, verifyEndpointError, verifyEndpointGet} = require('./schema');
 const {startWithDelay, testEngine} = require('./test');
 
 describe('connect middleware', () => {
   let app;
   beforeEach(() => {
-    app = new connect();
+    app = new connect()
+      .use(query());
   });
 
   function gqlServer() {
@@ -32,6 +33,9 @@ describe('connect middleware', () => {
 
     it('processes successful query', () => {
       return verifyEndpointSuccess(url, true);
+    });
+    it('processes successful GET query', () => {
+      return verifyEndpointGet(url, true);
     });
     it('processes invalid query', () => {
       return verifyEndpointFailure(url);
@@ -58,6 +62,9 @@ describe('connect middleware', () => {
 
     it('processes successful query', () => {
       return verifyEndpointSuccess(url, false);
+    });
+    it('processes successful GET query', () => {
+      return verifyEndpointGet(url, false);
     });
     it('processes invalid query', () => {
       return verifyEndpointFailure(url);

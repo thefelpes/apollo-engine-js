@@ -3,8 +3,7 @@ const koaRouter = require('koa-router');
 const koaBody = require('koa-bodyparser');
 const {graphqlKoa} = require('apollo-server-koa');
 
-const {Engine} = require('../lib/index');
-const {schema, rootValue, verifyEndpointSuccess, verifyEndpointFailure, verifyEndpointError} = require('./schema');
+const {schema, rootValue, verifyEndpointSuccess, verifyEndpointFailure, verifyEndpointError, verifyEndpointGet} = require('./schema');
 const {startWithDelay, testEngine} = require('./test');
 
 describe('koa middleware', () => {
@@ -38,6 +37,9 @@ describe('koa middleware', () => {
     it('processes successful query', () => {
       return verifyEndpointSuccess(url, true);
     });
+    it('processes successful GET query', () => {
+      return verifyEndpointGet(url, true);
+    });
     it('processes invalid query', () => {
       return verifyEndpointFailure(url);
     });
@@ -63,6 +65,9 @@ describe('koa middleware', () => {
 
     it('processes successful query', () => {
       return verifyEndpointSuccess(url, false);
+    });
+    it('processes successful GET query', () => {
+      return verifyEndpointGet(url, false);
     });
     it('processes invalid query', () => {
       return verifyEndpointFailure(url);

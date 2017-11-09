@@ -9,7 +9,7 @@ const {assert} = require('chai');
 const isRunning = require('is-running');
 
 const {Engine} = require('../lib/index');
-const {schema, rootValue, verifyEndpointSuccess, verifyEndpointFailure, verifyEndpointError} = require('./schema');
+const {schema, rootValue, verifyEndpointSuccess, verifyEndpointFailure, verifyEndpointError, verifyEndpointGet} = require('./schema');
 const {startWithDelay, stopWithDelay, testEngine} = require('./test');
 
 describe('express middleware', () => {
@@ -61,6 +61,9 @@ describe('express middleware', () => {
     it('processes successful query', () => {
       return verifyEndpointSuccess(url, true)
     });
+    it('processes successful GET query', () => {
+      return verifyEndpointGet(url, true);
+    });
     it('processes invalid query', () => {
       return verifyEndpointFailure(url);
     });
@@ -81,6 +84,9 @@ describe('express middleware', () => {
       it('processes successful query', () => {
         return verifyEndpointSuccess(url, true);
       });
+      it('processes successful GET query', () => {
+        return verifyEndpointGet(url, true);
+      });
       it('processes invalid query', () => {
         return verifyEndpointFailure(url);
       });
@@ -98,6 +104,9 @@ describe('express middleware', () => {
       it('processes successful query', () => {
         return verifyEndpointSuccess(url, false);
       });
+      it('processes successful GET query', () => {
+        return verifyEndpointGet(url, false);
+      });
       it('processes invalid query', () => {
         return verifyEndpointFailure(url);
       });
@@ -113,7 +122,6 @@ describe('express middleware', () => {
       await startWithDelay(engine);
       return verifyEndpointSuccess(`http://localhost:${engine.graphqlPort}/`, false);
     });
-
 
     it('does not route child path through proxy', async () => {
       setupEngine();
