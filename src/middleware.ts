@@ -3,6 +3,7 @@ import {Context} from 'koa'
 import {Server} from 'hapi'
 import * as request from 'request'
 import {IncomingMessage, ServerResponse} from 'http';
+import { parse as urlParser } from 'url';
 
 export class MiddlewareParams {
     public endpoint: string;
@@ -11,6 +12,18 @@ export class MiddlewareParams {
     public dumpTraffic: boolean;
 }
 
+export function makeMicroMiddleware(params: MiddlewareParams) {
+    return function(fn: Function) {
+        return function (req: IncomingMessage, res: ServerResponse) {
+            const { path } = urlParser(req.url || '');
+            if (!params.uri || path !== params.endpoint) return fn(req, res);
+            else if (req.method !== 'GET' && req.method !== 'POST') return fn(req, res);
+            else if (req.headers['x-engine-from'] === params.psk) return fn(req, res);
+            else proxyRequest(params, req, res);
+        }
+    }
+}
+  
 export function makeExpressMiddleware(params: MiddlewareParams) {
     return function (req: Request, res: Response, next: NextFunction) {
         if (!params.uri || req.path !== params.endpoint) next();
@@ -59,11 +72,13 @@ export function instrumentHapi(server: Server, params: MiddlewareParams) {
 }
 
 function proxyRequest(params: MiddlewareParams, req: IncomingMessage, res: ServerResponse) {
+    console.log('parraaaams', params);
     if (params.dumpTraffic) {
         req.pipe(process.stdout);
     }
 
     let proxyRes = req.pipe(request(params.uri + req.url));
+
     if (params.dumpTraffic) {
         proxyRes.pipe(process.stdout);
     }
