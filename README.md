@@ -10,6 +10,10 @@ GraphQL requests through that proxy:
 
 ![Sequence Diagram](docs/sequence-diagram.png)
 
+# Release Notes
+
+Please see our [Release Notes](https://www.apollographql.com/docs/engine/proxy-release-notes.html) in the Engine documenation.
+
 # Usage
 ```js
 import { Engine } from 'apollo-engine';
