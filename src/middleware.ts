@@ -72,13 +72,11 @@ export function instrumentHapi(server: Server, params: MiddlewareParams) {
 }
 
 function proxyRequest(params: MiddlewareParams, req: IncomingMessage, res: ServerResponse) {
-    console.log('parraaaams', params);
     if (params.dumpTraffic) {
         req.pipe(process.stdout);
     }
 
     let proxyRes = req.pipe(request(params.uri + req.url));
-
     if (params.dumpTraffic) {
         proxyRes.pipe(process.stdout);
     }
