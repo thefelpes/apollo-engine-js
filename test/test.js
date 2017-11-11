@@ -4,7 +4,7 @@ exports.startWithDelay = (engine) => {
   return new Promise((resolve) => {
     engine.start()
       .then(() => {
-        setTimeout(resolve, 100);
+        setTimeout(resolve, 300);
       })
   });
 };
@@ -17,7 +17,7 @@ exports.stopWithDelay = (engine) => {
       reject(e);
       return;
     }
-    setTimeout(resolve, 100);
+    setTimeout(resolve, 300);
   });
 };
 
