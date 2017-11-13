@@ -72,7 +72,7 @@ describe('micro middleware', () => {
       return verifyEndpointSuccess(url, false);
     });
     it('processes successful GET query', () => {
-      return verifyEndpointGet(url, true);
+      return verifyEndpointGet(url, false);
     });
     it('processes invalid query', () => {
       return verifyEndpointFailure(url);

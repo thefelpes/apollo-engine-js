@@ -15,8 +15,8 @@ export class MiddlewareParams {
 export function makeMicroMiddleware(params: MiddlewareParams) {
     return function(fn: Function) {
         return function (req: IncomingMessage, res: ServerResponse) {
-            const { path } = urlParser(req.url || '');
-            if (!params.uri || path !== params.endpoint) return fn(req, res);
+            const { pathname } = urlParser(req.url || '');
+            if (!params.uri || pathname !== params.endpoint) return fn(req, res);
             else if (req.method !== 'GET' && req.method !== 'POST') return fn(req, res);
             else if (req.headers['x-engine-from'] === params.psk) return fn(req, res);
             else proxyRequest(params, req, res);
