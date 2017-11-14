@@ -6,6 +6,7 @@ import { readFileSync, existsSync } from 'fs';
 
 import {
     MiddlewareParams,
+    makeMicroMiddleware,
     makeExpressMiddleware,
     makeConnectMiddleware,
     makeKoaMiddleware,
@@ -210,6 +211,10 @@ export class Engine {
                 resultPort(port);
             }).listen(0);
         });
+    }
+
+    public microMiddleware(): (fn: Function) => void {
+        return makeMicroMiddleware(this.middlewareParams);
     }
 
     public expressMiddleware(): (req: any, res: any, next: any) => void {
