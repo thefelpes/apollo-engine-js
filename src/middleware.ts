@@ -34,7 +34,7 @@ export function makeExpressMiddleware(params: MiddlewareParams) {
 }
 
 export function makeConnectMiddleware(params: MiddlewareParams) {
-    const endpointRegex = new RegExp(`^${params.endpoint}(\\?.*)?$`);
+    const endpointRegex = new RegExp(`^${params.endpoint}(\\?|$)`);
     return function (req: any, res: any, next: any) {
         if (!params.uri || !endpointRegex.test(req.originalUrl)) next();
         else if (req.method !== 'GET' && req.method !== 'POST') next();
