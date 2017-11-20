@@ -47,7 +47,11 @@ describe('express middleware', () => {
 
   function setupEngine(path) {
     engine = testEngine(path);
-    app.use(engine.expressMiddleware());
+    if (path) {
+      app.use(path, engine.expressMiddleware());
+    } else {
+      app.use(engine.expressMiddleware());
+    }
 
     engine.graphqlPort = gqlServer(path);
   }
@@ -140,6 +144,23 @@ describe('express middleware', () => {
 
       // GraphQL through proxy works too:
       return verifyEndpointSuccess(`http://localhost:${engine.graphqlPort}/graphql`, false);
+    });
+  });
+
+  describe('child middleware', () => {
+    let url;
+    beforeEach(async () => {
+      setupEngine('/graphql');
+      await startWithDelay(engine);
+      url = `http://localhost:${engine.graphqlPort}/graphql`;
+    });
+
+    it('processes successful query', () => {
+      return verifyEndpointSuccess(url, false);
+    });
+
+    it('processes successful GET query', () => {
+      return verifyEndpointGet(url, false);
     });
   });
 

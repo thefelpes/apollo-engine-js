@@ -73,4 +73,28 @@ describe('connect middleware', () => {
       return verifyEndpointError(url);
     });
   });
+
+  describe('child middleware', () => {
+    let url, engine;
+    beforeEach(async () => {
+      engine = testEngine();
+      app.use('/graphql', engine.connectMiddleware());
+      let server = gqlServer();
+      engine.graphqlPort = server.address().port;
+      await startWithDelay(engine);
+      url = `http://localhost:${engine.graphqlPort}/graphql`;
+    });
+
+    afterEach(() => {
+      engine.stop();
+    });
+
+    it('processes successful query', () => {
+      return verifyEndpointSuccess(url, false);
+    });
+
+    it('processes successful GET query', () => {
+      return verifyEndpointGet(url, false);
+    });
+  });
 });
