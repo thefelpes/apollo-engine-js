@@ -69,7 +69,7 @@ export interface EngineConfig {
         noTraceVariables?: boolean,
         privateHeaders?: string[],
     },
-    queryCache: {
+    queryCache?: {
         publicFullQueryStore?: string,
         privateFullQueryStore?: string,
     }
