@@ -23,23 +23,30 @@ export function makeMicroMiddleware(params: MiddlewareParams) {
         }
     }
 }
-  
+
 export function makeExpressMiddleware(params: MiddlewareParams) {
+    const endpointRegex = new RegExp(`^${params.endpoint}(\\?|$)`);
     return function (req: Request, res: Response, next: NextFunction) {
-        if (!params.uri || req.path !== params.endpoint) next();
+        if (!params.uri || !endpointRegex.test(req.originalUrl)) next();
         else if (req.method !== 'GET' && req.method !== 'POST') next();
         else if (req.headers['x-engine-from'] === params.psk) next();
-        else proxyRequest(params, req, res);
+        else {
+            req.url = req.originalUrl;
+            proxyRequest(params, req, res);
+        }
     }
 }
 
 export function makeConnectMiddleware(params: MiddlewareParams) {
-    const endpointRegex = new RegExp(`^${params.endpoint}(\\?.*)?$`);
+    const endpointRegex = new RegExp(`^${params.endpoint}(\\?|$)`);
     return function (req: any, res: any, next: any) {
         if (!params.uri || !endpointRegex.test(req.originalUrl)) next();
         else if (req.method !== 'GET' && req.method !== 'POST') next();
         else if (req.headers['x-engine-from'] === params.psk) next();
-        else proxyRequest(params, req, res);
+        else {
+            req.url = req.originalUrl;
+            proxyRequest(params, req, res);
+        }
     }
 }
 
