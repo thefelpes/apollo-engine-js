@@ -9,7 +9,7 @@ const {assert} = require('chai');
 const isRunning = require('is-running');
 
 const {Engine} = require('../lib/index');
-const {schema, rootValue, verifyEndpointSuccess, verifyEndpointFailure, verifyEndpointError, verifyEndpointGet} = require('./schema');
+const {schema, rootValue, verifyEndpointSuccess, verifyEndpointFailure, verifyEndpointError, verifyEndpointGet, verifyEndpointBatch} = require('./schema');
 const {startWithDelay, stopWithDelay, testEngine} = require('./test');
 
 describe('express middleware', () => {
@@ -113,6 +113,9 @@ describe('express middleware', () => {
       it('processes query that errors', () => {
         return verifyEndpointError(url);
       });
+      it('processes batched queries', () => {
+        return verifyEndpointBatch(url);
+      })
     });
   });
 
@@ -160,6 +163,24 @@ describe('express middleware', () => {
       return verifyEndpointSuccess(`http://localhost:${port}/graphql`, false);
     });
 
+    it('passes supportsBatch', async () => {
+      engine = new Engine({
+        engineConfig: {
+          apiKey: 'faked',
+        },
+        supportsBatch: true,
+        endpoint: '/graphql',
+        graphqlPort: 1,
+      });
+      app.use(engine.expressMiddleware());
+
+      let port = gqlServer('/graphql');
+      engine.graphqlPort = port;
+
+      await startWithDelay(engine);
+      return verifyEndpointBatch(`http://localhost:${port}/graphql`, false);
+    });
+
     it('appends configuration', (done) => {
       // Grab a random port locally:
       const srv = createServer();
@@ -182,7 +203,8 @@ describe('express middleware', () => {
         engine = new Engine({
           endpoint: '/graphql',
           engineConfig,
-          graphqlPort: 1
+          graphqlPort: 1,
+          supportsBatch: true,
         });
         app.use(engine.expressMiddleware());
 

@@ -37,6 +37,29 @@ exports.verifyEndpointSuccess = (url, hasTracing) => {
   })
 };
 
+exports.verifyEndpointBatch = (url, hasTracing) => {
+  return new Promise((resolve) => {
+    request.post({
+      url,
+      json: true,
+      body: [{'query': '{ hello }'}, {'query': '{ hello }'}]
+    }, (err, response, body) => {
+      assert.strictEqual(2, body.length);
+
+      body.forEach(body => {
+        assert.strictEqual('Hello World', body['data']['hello']);
+        if (hasTracing) {
+          assert.notEqual(undefined, body['extensions'] && body['extensions']['tracing']);
+        } else {
+          assert.strictEqual(undefined, body['extensions'] && body['extensions']['tracing']);
+        }
+      });
+
+      resolve();
+    });
+  })
+};
+
 exports.verifyEndpointFailure = (url) => {
   return new Promise((resolve) => {
     request.post({

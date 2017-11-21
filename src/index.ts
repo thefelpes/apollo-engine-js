@@ -30,6 +30,7 @@ export interface EngineConfig {
             url: string,
             headerSecret: string,
         }
+        supportsBatch?: boolean ,
         requestTimeout?: string ,
         maxConcurrentRequests?: number,
     }[],
@@ -79,7 +80,8 @@ export interface SideloadConfig {
     engineConfig: string | EngineConfig,
     endpoint?: string,
     graphqlPort?: number,
-    dumpTraffic?: boolean
+    dumpTraffic?: boolean,
+    supportsBatch?: boolean,
 }
 
 export class Engine {
@@ -88,6 +90,7 @@ export class Engine {
     private binary: string;
     private config: string | EngineConfig;
     private middlewareParams: MiddlewareParams;
+    private supportsBatch: boolean;
     private started: Boolean;
     private killed: Boolean;
 
@@ -98,6 +101,7 @@ export class Engine {
         this.middlewareParams.endpoint = config.endpoint || '/graphql';
         this.middlewareParams.psk = randomBytes(48).toString("hex");
         this.middlewareParams.dumpTraffic = config.dumpTraffic || false;
+        this.supportsBatch = config.supportsBatch || false;
         if (config.graphqlPort) {
             this.graphqlPort = config.graphqlPort;
         } else {
@@ -169,7 +173,8 @@ export class Engine {
                         http: {
                             url: 'http://127.0.0.1:' + graphqlPort + endpoint,
                             headerSecret: this.middlewareParams.psk
-                        }
+                        },
+                        supportsBatch: this.supportsBatch,
                     }];
                 } else {
                     // Extend any existing HTTP origins with the chosen PSK:
@@ -177,7 +182,8 @@ export class Engine {
                         if (typeof origin.http === 'object') {
                             origin.http.headerSecret = this.middlewareParams.psk;
                         }
-                    })
+                        // Don't update `supportsBatch`
+                    });
                 }
 
                 let binaryPath = resolve(__dirname, '../node_modules', this.binary);
