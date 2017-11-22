@@ -83,7 +83,16 @@ function proxyRequest(params: MiddlewareParams, req: IncomingMessage, res: Serve
         req.pipe(process.stdout);
     }
 
-    let proxyRes = req.pipe(request(params.uri + req.url));
+    const proxyRes = req.pipe(request({
+        uri: params.uri + req.url,
+        forever: true,
+    }))
+        .on('error', (err) => {
+            console.error(err);
+            res.writeHead(503);
+            res.end();
+        });
+
     if (params.dumpTraffic) {
         proxyRes.pipe(process.stdout);
     }
