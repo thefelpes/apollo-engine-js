@@ -1,8 +1,8 @@
-import { ChildProcess, spawn } from 'child_process';
-import { randomBytes } from 'crypto';
-import { createServer } from 'net';
-import { resolve } from 'path';
-import { readFileSync, existsSync } from 'fs';
+import {ChildProcess, spawn} from 'child_process';
+import {randomBytes} from 'crypto';
+import {createServer} from 'net';
+import {resolve} from 'path';
+import {readFileSync, existsSync} from 'fs';
 
 import {
     MiddlewareParams,
@@ -30,8 +30,8 @@ export interface EngineConfig {
             url: string,
             headerSecret: string,
         }
-        supportsBatch?: boolean ,
-        requestTimeout?: string ,
+        supportsBatch?: boolean,
+        requestTimeout?: string,
         maxConcurrentRequests?: number,
     }[],
     frontends?: {
@@ -182,7 +182,9 @@ export class Engine {
                         if (typeof origin.http === 'object') {
                             origin.http.headerSecret = this.middlewareParams.psk;
                         }
-                        // Don't update `supportsBatch`
+                        if (origin.supportsBatch === undefined) {
+                            origin.supportsBatch = this.supportsBatch;
+                        }
                     });
                 }
 
@@ -250,6 +252,6 @@ export class Engine {
     }
 
     private engineLineWrapper(): any {
-        return new LineWrapper({ prefix: 'EngineProxy ==> ' });
+        return new LineWrapper({prefix: 'EngineProxy ==> '});
     }
 }
