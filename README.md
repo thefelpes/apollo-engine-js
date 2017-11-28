@@ -39,7 +39,22 @@ engine.stop();
 
 The graphql server should have tracing enabled if available. If you are using Apollo Server (v1.1.0 or newer), enable the `tracing: true` configuration option.
 
+# Middleware Configuration
+
+```js
+{
+  "engineConfig": {
+    // See the documentation section on https://www.apollographql.com/docs/engine/proto-doc.html
+  },
+  "endpoint": "/graphql",           // Path of GraphQL endpoint, normally /graphql.
+  "graphqlPort": process.env.PORT,  // Port that the NodeJS server is running on.
+  "dumpTraffic": false,             // If true, HTTP requests and responses will be dumped to stdout. Should only be used if debugging an issue.
+  "supportsBatch": true,            // True if this server supports transport-level batching
+}
+```
+
 # Minimum Engine Configuration
+
 This is the minimum necessary information in the engine configuration object to enable sending tracing and telemetry information.
 
 ```json
@@ -47,7 +62,3 @@ This is the minimum necessary information in the engine configuration object to 
   "apiKey": "service:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 }
 ```
-
-# Full Engine Configuration
-
-See the documentation section on [configuring the proxy](https://www.apollographql.com/docs/engine/proto-doc.html)
