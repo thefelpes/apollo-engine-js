@@ -5,7 +5,7 @@ const {graphqlConnect} = require('apollo-server-express');
 const http = require('http');
 
 const {schema, rootValue, verifyEndpointSuccess, verifyEndpointFailure, verifyEndpointError, verifyEndpointGet} = require('./schema');
-const {startWithDelay, testEngine} = require('./test');
+const {testEngine} = require('./test');
 
 describe('connect middleware', () => {
   let app;
@@ -50,9 +50,9 @@ describe('connect middleware', () => {
     beforeEach(async () => {
       engine = testEngine();
       app.use(engine.connectMiddleware());
-      let server = gqlServer();
+      const server = gqlServer();
       engine.graphqlPort = server.address().port;
-      await startWithDelay(engine);
+      await engine.start();
       url = `http://localhost:${engine.graphqlPort}/graphql`;
     });
 
@@ -79,9 +79,9 @@ describe('connect middleware', () => {
     beforeEach(async () => {
       engine = testEngine();
       app.use('/graphql', engine.connectMiddleware());
-      let server = gqlServer();
+      const server = gqlServer();
       engine.graphqlPort = server.address().port;
-      await startWithDelay(engine);
+      await engine.start();
       url = `http://localhost:${engine.graphqlPort}/graphql`;
     });
 

@@ -4,7 +4,7 @@ const koaBody = require('koa-bodyparser');
 const {graphqlKoa} = require('apollo-server-koa');
 
 const {schema, rootValue, verifyEndpointSuccess, verifyEndpointFailure, verifyEndpointError, verifyEndpointGet} = require('./schema');
-const {startWithDelay, testEngine} = require('./test');
+const {testEngine} = require('./test');
 
 describe('koa middleware', () => {
   let app;
@@ -55,7 +55,7 @@ describe('koa middleware', () => {
       app.use(engine.koaMiddleware());
       let server = gqlServer();
       engine.graphqlPort = server.address().port;
-      await startWithDelay(engine);
+      await engine.start();
 
       url = `http://localhost:${engine.graphqlPort}/graphql`;
     });

@@ -2,15 +2,13 @@ const http = require('http');
 const express = require('express');
 const {graphqlExpress} = require('apollo-server-express');
 const bodyParser = require('body-parser');
-const {createServer} = require('net');
 
 const request = require('request-promise-native');
 const {assert} = require('chai');
 const isRunning = require('is-running');
 
-const {Engine} = require('../lib/index');
 const {schema, rootValue, verifyEndpointSuccess, verifyEndpointFailure, verifyEndpointError, verifyEndpointGet, verifyEndpointBatch} = require('./schema');
-const {startWithDelay, stopWithDelay, testEngine} = require('./test');
+const {testEngine} = require('./test');
 
 describe('express middleware', () => {
   // Start graphql-express on a random port:
@@ -19,13 +17,12 @@ describe('express middleware', () => {
     app = express();
   });
   afterEach(async () => {
-    if (engine && engine.started) {
-      const pid = engine.child.pid;
-      await stopWithDelay(engine);
-      // Make sure that we actually manage to kill the binary.
-      // XXX This only verifies that the outer -restart=true binary is killed, not
-      //     the actual proxy itself.
-      assert.isFalse(isRunning(pid));
+    if (engine) {
+      if (engine.started) {
+        const pid = engine.child.pid;
+        await engine.stop();
+        assert.isFalse(isRunning(pid));
+      }
       engine = null;
     }
   });
@@ -102,7 +99,7 @@ describe('express middleware', () => {
     describe('engine started', () => {
       // Start engine middleware (i.e. spawn proxy)
       beforeEach(async () => {
-        await startWithDelay(engine);
+        await engine.start();
       });
 
       it('processes successful query', () => {
@@ -126,7 +123,7 @@ describe('express middleware', () => {
   describe('custom path routing', () => {
     it('allows routing root path through proxy', async () => {
       setupEngine('/');
-      await startWithDelay(engine);
+      await engine.start();
       return verifyEndpointSuccess(`http://localhost:${engine.graphqlPort}/`, false);
     });
 
@@ -139,7 +136,7 @@ describe('express middleware', () => {
       assert.strictEqual('{"pong":true}', childDirect);
 
       // Start engine proxy:
-      await startWithDelay(engine);
+      await engine.start();
 
       // Same request with middleware installed works:
       let childThroughProxy = await request.get(childUrl);
@@ -154,7 +151,7 @@ describe('express middleware', () => {
     let url;
     beforeEach(async () => {
       setupEngine('/graphql');
-      await startWithDelay(engine);
+      await engine.start();
       url = `http://localhost:${engine.graphqlPort}/graphql`;
     });
 
@@ -164,98 +161,6 @@ describe('express middleware', () => {
 
     it('processes successful GET query', () => {
       return verifyEndpointGet(url, false);
-    });
-  });
-
-  describe('engine config', () => {
-    it('allows reading from file proxy', async () => {
-      // Install middleware before GraphQL handler:
-      engine = new Engine({
-        endpoint: '/graphql',
-        engineConfig: 'test/engine.json',
-        graphqlPort: 1
-      });
-      app.use(engine.expressMiddleware());
-
-      let port = gqlServer('/graphql');
-      engine.graphqlPort = port;
-
-      await startWithDelay(engine);
-      return verifyEndpointSuccess(`http://localhost:${port}/graphql`, false);
-    });
-
-    it('passes supportsBatch', async () => {
-      engine = new Engine({
-        engineConfig: {
-          apiKey: 'faked',
-        },
-        supportsBatch: true,
-        endpoint: '/graphql',
-        graphqlPort: 1,
-      });
-      app.use(engine.expressMiddleware());
-
-      let port = gqlServer('/graphql');
-      engine.graphqlPort = port;
-
-      await startWithDelay(engine);
-      return verifyEndpointBatch(`http://localhost:${port}/graphql`, false);
-    });
-
-    it('appends configuration', (done) => {
-      // Grab a random port locally:
-      const srv = createServer();
-      srv.on('listening', async () => {
-        const extraPort = srv.address().port;
-        srv.close();
-
-        // Setup engine, with an extra frontend on that port:
-        let engineConfig = {
-          apiKey: 'faked',
-          frontends: [{
-            host: '127.0.0.1',
-            endpoint: '/graphql',
-            port: extraPort
-          }],
-          reporting: {
-            noTraceVariables: true
-          }
-        };
-        engine = new Engine({
-          endpoint: '/graphql',
-          engineConfig,
-          graphqlPort: 1,
-          supportsBatch: true,
-        });
-        app.use(engine.expressMiddleware());
-
-        let port = gqlServer('/graphql');
-        // Provide origins _before_ starting:
-        engineConfig.origins = [
-          {
-            lambda: {
-              functionArn: 'arn:aws:lambda:us-east-1:1234567890:function:mock_function',
-              awsAccessKeyId: 'foo',
-              awsSecretAccessKey: 'bar'
-            }
-          },
-          {
-            http: {
-              url: `http://localhost:${port}/graphql`
-            }
-          }
-        ];
-        await startWithDelay(engine);
-
-        // Non-HTTP origin unchanged:
-        assert.strictEqual(undefined, engineConfig.origins[0].http);
-        // HTTP origin has PSK injected:
-        assert.notEqual(undefined, engineConfig.origins[1].http.headerSecret);
-
-        await verifyEndpointSuccess(`http://localhost:${port}/graphql`, false);
-        await verifyEndpointSuccess(`http://localhost:${extraPort}/graphql`, false);
-        done();
-      }).listen(0)
     });
   });
 });

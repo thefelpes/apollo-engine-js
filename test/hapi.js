@@ -4,7 +4,7 @@ const {graphqlHapi} = require('apollo-server-hapi');
 const {assert} = require('chai');
 const request = require('request-promise-native');
 const {schema, rootValue, verifyEndpointSuccess, verifyEndpointFailure, verifyEndpointError, verifyEndpointGet} = require('./schema');
-const {startWithDelay, testEngine} = require('./test');
+const {testEngine} = require('./test');
 
 describe('hapi middleware', () => {
   let server;
@@ -68,7 +68,7 @@ describe('hapi middleware', () => {
       engine = testEngine();
       engine.graphqlPort = port;
       engine.instrumentHapiServer(server);
-      await startWithDelay(engine);
+      await engine.start();
     });
 
     afterEach(async () => {

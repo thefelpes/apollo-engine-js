@@ -3,7 +3,7 @@ const {microGraphql} = require('apollo-server-micro');
 const {get, post, router} = require('microrouter')
 
 const {schema, rootValue, verifyEndpointSuccess, verifyEndpointFailure, verifyEndpointError, verifyEndpointGet} = require('./schema');
-const {startWithDelay, testEngine} = require('./test');
+const {testEngine} = require('./test');
 
 describe('micro middleware', () => {
   let app;
@@ -60,7 +60,7 @@ describe('micro middleware', () => {
       let server = gqlServer(engine.microMiddleware());
       url = `http://localhost:${server.address().port}/graphql`;
       engine.graphqlPort = server.address().port;
-      await startWithDelay(engine);
+      await engine.start();
       url = `http://localhost:${engine.graphqlPort}/graphql`;
     });
   
