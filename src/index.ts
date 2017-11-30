@@ -1,7 +1,6 @@
 import {ChildProcess, spawn} from 'child_process';
 import {randomBytes} from 'crypto';
-import {resolve} from 'path';
-import {readFileSync, existsSync} from 'fs';
+import {readFileSync} from 'fs';
 import {EventEmitter} from 'events';
 import {parse as urlParser} from 'url';
 
@@ -93,6 +92,9 @@ export interface EngineConfig {
         debugReports?: boolean,
         noTraceVariables?: boolean,
         privateHeaders?: string[],
+        privateVariables?: string[],
+        disabled?: boolean,
+        proxyUrl?: string,
     },
     queryCache?: {
         publicFullQueryStore?: string,
