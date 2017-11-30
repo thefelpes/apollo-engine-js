@@ -25,22 +25,42 @@ export interface AccessLogConfig {
     responseHeaders?: string[],
 }
 
+export interface ExtensionsConfig {
+    strip?: string[],
+    blacklist?: string[],
+}
+
+// User-configurable fields of EngineConfig "frontend"
+export interface FrontendParams {
+    extensions?: ExtensionsConfig,
+}
+
+// All configuration of "frontend" (including fields managed by apollo-engine-js)
+export interface FrontendConfig extends FrontendParams {
+    host: string,
+    endpoint: string,
+    port: number,
+}
+
+// User-configurable fields of EngineConfig "origin"
+export interface OriginParams {
+    requestTimeout?: string,
+    maxConcurrentRequests?: number,
+    supportsBatch?: boolean,
+}
+
+// All configuration of "origin"  (including fields managed by apollo-engine-js)
+export interface OriginConfig extends OriginParams {
+    http: {
+        url: string,
+        headerSecret: string,
+    }
+}
+
 export interface EngineConfig {
     apiKey: string,
-    origins?: {
-        http: {
-            url: string,
-            headerSecret: string,
-        }
-        supportsBatch?: boolean,
-        requestTimeout?: string,
-        maxConcurrentRequests?: number,
-    }[],
-    frontends?: {
-        host: string,
-        endpoint: string,
-        port: number,
-    }[],
+    origins?: OriginConfig[],
+    frontends?: FrontendConfig[],
     stores?: {
         name: string,
         memcache?: {
@@ -85,8 +105,9 @@ export interface SideloadConfig {
     endpoint?: string,
     graphqlPort?: number,
     dumpTraffic?: boolean,
-    supportsBatch?: boolean,
     startupTimeout?: number,
+    origin?: OriginParams
+    frontend?: FrontendParams
 }
 
 export class Engine extends EventEmitter {
@@ -95,9 +116,10 @@ export class Engine extends EventEmitter {
     private binary: string;
     private config: string | EngineConfig;
     private middlewareParams: MiddlewareParams;
-    private supportsBatch: boolean;
     private running: Boolean;
     private startupTimeout: number;
+    private originParams: OriginParams;
+    private frontendParams: FrontendParams;
 
     public constructor(config: SideloadConfig) {
         super();
@@ -107,7 +129,8 @@ export class Engine extends EventEmitter {
         this.middlewareParams.endpoint = config.endpoint || '/graphql';
         this.middlewareParams.psk = randomBytes(48).toString("hex");
         this.middlewareParams.dumpTraffic = config.dumpTraffic || false;
-        this.supportsBatch = config.supportsBatch || false;
+        this.originParams = config.origin || {};
+        this.frontendParams = config.frontend || {};
         if (config.graphqlPort) {
             this.graphqlPort = config.graphqlPort;
         } else {
@@ -169,11 +192,11 @@ export class Engine extends EventEmitter {
         childConfig.logging.destination = 'STDOUT';
 
         // Inject frontend, that we will route
-        let frontend = {
+        const frontend = Object.assign({}, this.frontendParams, {
             host: '127.0.0.1',
             endpoint,
             port: 0,
-        };
+        });
         if (typeof childConfig.frontends === 'undefined') {
             childConfig.frontends = [frontend];
         } else {
@@ -181,19 +204,23 @@ export class Engine extends EventEmitter {
         }
 
         if (typeof childConfig.origins === 'undefined') {
-            childConfig.origins = [{
+            const origin = Object.assign({}, this.originParams, {
                 http: {
                     url: 'http://127.0.0.1:' + graphqlPort + endpoint,
                     headerSecret: this.middlewareParams.psk
-                }
-            }];
+                },
+            });
+            childConfig.origins = [origin];
         } else {
             // Extend any existing HTTP origins with the chosen PSK:
+            // (trust it to fill other fields correctly)
             childConfig.origins.forEach(origin => {
                 if (typeof origin.http === 'object') {
-                    origin.http.headerSecret = this.middlewareParams.psk;
+                    Object.assign(origin.http, {
+                        headerSecret: this.middlewareParams.psk,
+                    });
                 }
-            })
+            });
         }
 
         const spawnChild = () => {
@@ -244,7 +271,7 @@ export class Engine extends EventEmitter {
                 }
 
                 // Print log message:
-                if (!logLevelFilter || logRecord.level.match(logLevelFilter)) {
+                if (!logLevelFilter || !logRecord.level || logRecord.level.match(logLevelFilter)) {
                     console.log({proxy: logRecord});
                 }
             });
@@ -302,7 +329,7 @@ export class Engine extends EventEmitter {
                 if (!port) {
                     return reject('unknown url');
                 }
-                resolve(parseInt(port));
+                resolve(parseInt(port, 10));
             });
         });
     }

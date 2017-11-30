@@ -3,9 +3,9 @@
 [![npm version](https://badge.fury.io/js/apollo-engine.svg)](https://badge.fury.io/js/apollo-engine)
 [![Build Status](https://travis-ci.org/apollographql/apollo-engine-js.svg?branch=master)](https://travis-ci.org/apollographql/apollo-engine-js)
 
-This package integrates the Apollo Engine proxy with your GraphQL server.
+This package integrates the Apollo Engine Proxy with your GraphQL server.
 
-When installed, it starts the Apollo Engine proxy in a new process, then routes
+When installed, it starts the Apollo Engine Proxy in a new process, then routes
 GraphQL requests through that proxy:
 
 ![Sequence Diagram](docs/sequence-diagram.png)
@@ -61,6 +61,18 @@ This is the minimum necessary information in the engine configuration object to 
   "dumpTraffic": false,             // If true, HTTP requests and responses will be dumped to stdout. Should only be used if debugging an issue.
 
   // Shortcuts to "origins" in EngineConfig
-  "supportsBatch": true             // If false, GraphQL query batches will be broken up and processed in parallel. If true, they are batch processed.
+  "origin": {
+    "requestTimeout": "5s"          // Time to wait for the Node server to respond to the Engine Proxy.
+    "maxConcurrentRequests": 9999,  // The maximum number of concurrent GraphQL requests to make back to the Node server.
+    "supportsBatch": true,          // If false, GraphQL query batches will be broken up and processed in parallel. If true, they are batch processed.
+  },
+
+  // Shortcut to "frontends" in EngineConfig
+  "frontend": {
+    "extensions": {                             // Configuration for GraphQL response extensions
+      "strip": ["cacheControl", "tracing"],     // Extensions to remove from responses served to clients
+      "blacklist": ["tracing"],                 // Extensions to block from being served to clients, even if requested with "includeInResponse".
+    }
+  },
 }
 ```

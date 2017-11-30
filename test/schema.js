@@ -4,7 +4,7 @@ const {assert} = require('chai');
 
 exports.schema = buildSchema(`
   type Query {
-    hello: String
+    hello: String @cacheControl(maxAge: 30)
     errorTrigger: String
   }
 `);
@@ -32,7 +32,7 @@ exports.verifyEndpointSuccess = (url, hasTracing) => {
       } else {
         assert.strictEqual(undefined, body['extensions'] && body['extensions']['tracing']);
       }
-      resolve();
+      resolve(body);
     });
   })
 };

@@ -1,7 +1,7 @@
 {
   "apiKey": "faked",
   "logging": {
-    "level": "DEBUG",
+    "level": "WARN",
     "request": {
       "destination": "stdout",
       "requestHeaders": [

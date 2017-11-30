@@ -3,7 +3,6 @@ const {Engine} = require('../lib/index');
 exports.testEngine = (path) => {
   path = path || '/graphql';
 
-  // Install middleware before GraphQL handler:
   return new Engine({
     endpoint: path,
     engineConfig: {
@@ -12,6 +11,11 @@ exports.testEngine = (path) => {
         level: 'warn'
       },
     },
-    graphqlPort: 1
+    graphqlPort: 1,
+    frontend: {
+      extensions: {
+        strip: ['tracing'],
+      }
+    }
   });
 };

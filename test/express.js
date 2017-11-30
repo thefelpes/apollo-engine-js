@@ -34,9 +34,10 @@ describe('express middleware', () => {
     });
 
     app.use(path, bodyParser.json(), graphqlExpress({
-      schema: schema,
-      rootValue: rootValue,
-      tracing: true
+      schema,
+      rootValue,
+      tracing: true,
+      cacheControl: true,
     }));
 
     return http.createServer(app).listen().address().port;
@@ -70,6 +71,10 @@ describe('express middleware', () => {
     });
     it('processes query that errors', () => {
       return verifyEndpointError(url);
+    });
+    it('returns cache information', async () => {
+      const body = await verifyEndpointSuccess(url, true);
+      assert.notEqual(undefined, body['extensions'] && body['extensions']['cacheControl']);
     });
   });
 
@@ -116,7 +121,11 @@ describe('express middleware', () => {
       });
       it('processes batched queries', () => {
         return verifyEndpointBatch(url);
-      })
+      });
+      it('returns cache information', async () => {
+        const body = await verifyEndpointSuccess(url, false);
+        assert.notEqual(undefined, body['extensions'] && body['extensions']['cacheControl']);
+      });
     });
   });
 
