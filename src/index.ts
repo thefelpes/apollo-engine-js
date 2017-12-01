@@ -8,7 +8,7 @@ import {parse as urlParser} from 'url';
 const StreamJsonObjects = require('stream-json/utils/StreamJsonObjects');
 
 import {
-    MiddlewareParams,
+    ProxyConfigParams,
     makeMicroMiddleware,
     makeExpressMiddleware,
     makeConnectMiddleware,
@@ -102,10 +102,11 @@ export interface EngineConfig {
     }
 }
 
-export interface SideloadConfig {
+export interface ProxyConfig {
     engineConfig: string | EngineConfig,
     endpoint?: string,
     graphqlPort?: number,
+    doubleProxy?: boolean,
     dumpTraffic?: boolean,
     startupTimeout?: number,
     origin?: OriginParams
@@ -117,20 +118,20 @@ export class Engine extends EventEmitter {
     private graphqlPort: number;
     private binary: string;
     private config: string | EngineConfig;
-    private middlewareParams: MiddlewareParams;
+    private proxyConfigParams: ProxyConfigParams;
     private running: Boolean;
     private startupTimeout: number;
     private originParams: OriginParams;
     private frontendParams: FrontendParams;
 
-    public constructor(config: SideloadConfig) {
+    public constructor(config: ProxyConfig) {
         super();
         this.running = false;
         this.startupTimeout = config.startupTimeout || 1000;
-        this.middlewareParams = new MiddlewareParams();
-        this.middlewareParams.endpoint = config.endpoint || '/graphql';
-        this.middlewareParams.psk = randomBytes(48).toString("hex");
-        this.middlewareParams.dumpTraffic = config.dumpTraffic || false;
+        this.proxyConfigParams = new ProxyConfigParams();
+        this.proxyConfigParams.endpoint = config.endpoint || '/graphql';
+        this.proxyConfigParams.psk = randomBytes(48).toString("hex");
+        this.proxyConfigParams.dumpTraffic = config.dumpTraffic || false;
         this.originParams = config.origin || {};
         this.frontendParams = config.frontend || {};
         if (config.graphqlPort) {
@@ -173,7 +174,7 @@ export class Engine extends EventEmitter {
         }
         this.running = true;
         let config = this.config;
-        const endpoint = this.middlewareParams.endpoint;
+        const endpoint = this.proxyConfigParams.endpoint;
         const graphqlPort = this.graphqlPort;
 
         if (typeof config === 'string') {
@@ -213,7 +214,7 @@ export class Engine extends EventEmitter {
             const origin = Object.assign({}, this.originParams, {
                 http: {
                     url: 'http://127.0.0.1:' + graphqlPort + endpoint,
-                    headerSecret: this.middlewareParams.psk
+                    headerSecret: this.proxyConfigParams.psk
                 },
             });
             childConfig.origins = [origin];
@@ -223,7 +224,7 @@ export class Engine extends EventEmitter {
             childConfig.origins.forEach(origin => {
                 if (typeof origin.http === 'object') {
                     Object.assign(origin.http, {
-                        headerSecret: this.middlewareParams.psk,
+                        headerSecret: this.proxyConfigParams.psk,
                     });
                 }
             });
@@ -258,7 +259,7 @@ export class Engine extends EventEmitter {
                 // Look for message indicating successful startup:
                 if (logRecord.msg === 'Started HTTP server.') {
                     const address = logRecord.address;
-                    this.middlewareParams.uri = `http://${address}`;
+                    this.proxyConfigParams.uri = `http://${address}`;
 
                     // Notify proxy has started:
                     this.emit('start');
@@ -296,7 +297,7 @@ export class Engine extends EventEmitter {
             // Connect shutdown hooks:
             child.on('exit', (code, signal) => {
                 // Wipe the URI, so middleware doesn't route to dead process:
-                this.middlewareParams.uri = '';
+                this.proxyConfigParams.uri = '';
 
                 if (!this.running) {
                     // It's not an error if we think it's our fault.
@@ -331,7 +332,7 @@ export class Engine extends EventEmitter {
 
             this.on('start', () => {
                 clearTimeout(cancelTimeout);
-                const port = urlParser(this.middlewareParams.uri).port;
+                const port = urlParser(this.proxyConfigParams.uri).port;
                 if (!port) {
                     return reject('unknown url');
                 }
@@ -341,23 +342,23 @@ export class Engine extends EventEmitter {
     }
 
     public microMiddleware(): (fn: Function) => void {
-        return makeMicroMiddleware(this.middlewareParams);
+        return makeMicroMiddleware(this.proxyConfigParams);
     }
 
     public expressMiddleware(): (req: any, res: any, next: any) => void {
-        return makeExpressMiddleware(this.middlewareParams);
+        return makeExpressMiddleware(this.proxyConfigParams);
     }
 
     public connectMiddleware(): (req: any, res: any, next: any) => void {
-        return makeConnectMiddleware(this.middlewareParams);
+        return makeConnectMiddleware(this.proxyConfigParams);
     }
 
     public koaMiddleware(): (ctx: any, next: any) => void {
-        return makeKoaMiddleware(this.middlewareParams);
+        return makeKoaMiddleware(this.proxyConfigParams);
     }
 
     public instrumentHapiServer(server: any) {
-        instrumentHapi(server, this.middlewareParams);
+        instrumentHapi(server, this.proxyConfigParams);
     }
 
     public stop(): Promise<void> {

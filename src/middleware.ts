@@ -5,14 +5,14 @@ import * as request from 'request'
 import {IncomingMessage, ServerResponse} from 'http';
 import { parse as urlParser } from 'url';
 
-export class MiddlewareParams {
+export class ProxyConfigParams {
     public endpoint: string;
     public uri: string;
     public psk: string;
     public dumpTraffic: boolean;
 }
 
-export function makeMicroMiddleware(params: MiddlewareParams) {
+export function makeMicroMiddleware(params: ProxyConfigParams) {
     return function(fn: Function) {
         return function (req: IncomingMessage, res: ServerResponse) {
             const { pathname } = urlParser(req.url || '');
@@ -24,7 +24,7 @@ export function makeMicroMiddleware(params: MiddlewareParams) {
     }
 }
 
-export function makeExpressMiddleware(params: MiddlewareParams) {
+export function makeExpressMiddleware(params: ProxyConfigParams) {
     const endpointRegex = new RegExp(`^${params.endpoint}(\\?|$)`);
     return function (req: Request, res: Response, next: NextFunction) {
         if (!params.uri || !endpointRegex.test(req.originalUrl)) next();
@@ -37,7 +37,7 @@ export function makeExpressMiddleware(params: MiddlewareParams) {
     }
 }
 
-export function makeConnectMiddleware(params: MiddlewareParams) {
+export function makeConnectMiddleware(params: ProxyConfigParams) {
     const endpointRegex = new RegExp(`^${params.endpoint}(\\?|$)`);
     return function (req: any, res: any, next: any) {
         if (!params.uri || !endpointRegex.test(req.originalUrl)) next();
@@ -50,7 +50,7 @@ export function makeConnectMiddleware(params: MiddlewareParams) {
     }
 }
 
-export function makeKoaMiddleware(params: MiddlewareParams) {
+export function makeKoaMiddleware(params: ProxyConfigParams) {
     return function (ctx: Context, next: () => Promise<any>) {
         if (!params.uri || ctx.path !== params.endpoint) return next();
         else if (ctx.req.headers['x-engine-from'] === params.psk) return next();
@@ -67,7 +67,7 @@ export function makeKoaMiddleware(params: MiddlewareParams) {
 }
 
 
-export function instrumentHapi(server: Server, params: MiddlewareParams) {
+export function instrumentHapi(server: Server, params: ProxyConfigParams) {
     server.ext('onRequest', (req, reply) => {
         if (!params.uri) return reply.continue();
         const path = req.url.pathname;
@@ -78,7 +78,7 @@ export function instrumentHapi(server: Server, params: MiddlewareParams) {
     });
 }
 
-function proxyRequest(params: MiddlewareParams, req: IncomingMessage, res: ServerResponse) {
+function proxyRequest(params: ProxyConfigParams, req: IncomingMessage, res: ServerResponse) {
     if (params.dumpTraffic) {
         req.pipe(process.stdout);
     }
