@@ -137,14 +137,14 @@ export class Engine extends EventEmitter {
             this.graphqlPort = config.graphqlPort;
         } else {
             const port : any = process.env.PORT;
-            if (!isNaN(port) && isFinite(port)) {
+            if (isFinite(port)) {
                 this.graphqlPort = parseInt(port, 10);
             } else {
                 throw new Error(`Neither 'graphqlPort' nor process.env.PORT is set. ` +
-                    `In order for Apollo Engine to act as a proxy for your GraphQL server,` +
-                    `it needs to know which port your GraphQL server is (this is the port number` +
-                    `that comes before '/graphql'). If you see this error, you should make sure to` +
-                    `add e.g. 'graphqlPort: 1234' wherever you call new Engine(...).`);
+                    `In order for Apollo Engine to act as a proxy for your GraphQL server, ` +
+                    `it needs to know which port your GraphQL server is listening on (this is ` +
+                    `the port number that comes before '/graphql'). If you see this error, you ` +
+                    `should make sure to add e.g. 'graphqlPort: 1234' wherever you call new Engine(...).`);
             }
         }
         this.config = config.engineConfig;
