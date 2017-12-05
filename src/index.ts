@@ -99,6 +99,10 @@ export interface EngineConfig {
     queryCache?: {
         publicFullQueryStore?: string,
         privateFullQueryStore?: string,
+    },
+    persistedQueries?: {
+        store?: string,
+        compressionThreshold?: number,
     }
 }
 
