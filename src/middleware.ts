@@ -57,9 +57,14 @@ export function makeKoaMiddleware(params: MiddlewareParams) {
         else if (ctx.req.method !== 'GET' && ctx.req.method !== 'POST') return next();
         else return new Promise((resolve) => {
                 ctx.req.pipe(request(params.uri + ctx.originalUrl, (error, response, body) => {
-                    if (response.statusCode) ctx.response.status = response.statusCode;
-                    ctx.response.set(JSON.parse(JSON.stringify(response.headers)));
-                    ctx.response.body = body;
+                    if(!!error || !response) {
+                        ctx.throw(502, 'Missing response from Engine Proxy')
+                    }
+                    else if (response.statusCode) {
+                        ctx.response.status = response.statusCode;
+                        ctx.response.set(JSON.parse(JSON.stringify(response.headers)));
+                        ctx.response.body = body;
+                    }
                     resolve();
                 }));
             });
