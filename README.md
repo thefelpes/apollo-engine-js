@@ -59,6 +59,8 @@ This is the minimum necessary information in the engine configuration object to 
   "endpoint": "/graphql",           // Path of GraphQL endpoint, normally /graphql.
   "graphqlPort": process.env.PORT,  // Port that the NodeJS server is running on.
   "dumpTraffic": false,             // If true, HTTP requests and responses will be dumped to stdout. Should only be used if debugging an issue.
+  "startupTimeout": 5000,           // If >0, .start() will throw if the proxy binary does not finish startup within the given number of milliseconds.
+                                    // Defaults to 5000ms if not set.
 
   // Shortcuts to "origins" in EngineConfig
   "origin": {

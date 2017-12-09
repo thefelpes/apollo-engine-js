@@ -110,7 +110,10 @@ export interface SideloadConfig {
     engineConfig: string | EngineConfig,
     endpoint?: string,
     graphqlPort?: number,
+    // Should all requests/responses to the proxy be written to stdout?
     dumpTraffic?: boolean,
+    // Milliseconds to wait for the proxy binary to start; set to <=0 to wait forever.
+    // If not set, defaults to 5000ms.
     startupTimeout?: number,
     origin?: OriginParams
     frontend?: FrontendParams
@@ -130,7 +133,11 @@ export class Engine extends EventEmitter {
     public constructor(config: SideloadConfig) {
         super();
         this.running = false;
-        this.startupTimeout = config.startupTimeout || 1000;
+        if (typeof config.startupTimeout === 'undefined') {
+            this.startupTimeout = 5000;
+        } else {
+            this.startupTimeout = config.startupTimeout;
+        }
         this.middlewareParams = new MiddlewareParams();
         this.middlewareParams.endpoint = config.endpoint || '/graphql';
         this.middlewareParams.psk = randomBytes(48).toString("hex");
@@ -140,7 +147,7 @@ export class Engine extends EventEmitter {
         if (config.graphqlPort) {
             this.graphqlPort = config.graphqlPort;
         } else {
-            const port : any = process.env.PORT;
+            const port: any = process.env.PORT;
             if (isFinite(port)) {
                 this.graphqlPort = parseInt(port, 10);
             } else {
@@ -324,14 +331,17 @@ export class Engine extends EventEmitter {
         spawnChild();
 
         return new Promise((resolve, reject) => {
-            const cancelTimeout = setTimeout(() => {
-                this.running = false;
-                if (this.child) {
-                    this.child.kill('SIGKILL');
-                    this.child = null;
-                }
-                return reject(Error('timed out'));
-            }, this.startupTimeout);
+            let cancelTimeout : NodeJS.Timer;
+            if (this.startupTimeout > 0) {
+                cancelTimeout = setTimeout(() => {
+                    this.running = false;
+                    if (this.child) {
+                        this.child.kill('SIGKILL');
+                        this.child = null;
+                    }
+                    return reject(Error('timed out'));
+                }, this.startupTimeout);
+            }
 
             this.on('start', () => {
                 clearTimeout(cancelTimeout);
