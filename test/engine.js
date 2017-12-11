@@ -121,6 +121,21 @@ describe('engine', () => {
         done();
       }).listen(0)
     });
+
+    it('sets default startup timeout', () => {
+      engine = new Engine({
+        graphqlPort: 1,
+      });
+      assert.strictEqual(engine.startupTimeout, 5000);
+    });
+
+    it('accepts zero startup timeout', () => {
+      engine = new Engine({
+        graphqlPort: 1,
+        startupTimeout: 0,
+      });
+      assert.strictEqual(engine.startupTimeout, 0);
+    })
   });
 
   describe('process', () => {
