@@ -97,6 +97,7 @@ describe('engine', () => {
         // Provide origins _before_ starting:
         engineConfig.origins = [
           {
+            name: 'lambda',
             lambda: {
               functionArn: 'arn:aws:lambda:us-east-1:1234567890:function:mock_function',
               awsAccessKeyId: 'foo',
