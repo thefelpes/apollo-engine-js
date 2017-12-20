@@ -64,7 +64,7 @@ This is the minimum necessary information in the engine configuration object to 
 
   // Shortcuts to "origins" in EngineConfig
   "origin": {
-    "requestTimeout": "5s"          // Time to wait for the Node server to respond to the Engine Proxy.
+    "requestTimeout": "5s",          // Time to wait for the Node server to respond to the Engine Proxy.
     "maxConcurrentRequests": 9999,  // The maximum number of concurrent GraphQL requests to make back to the Node server.
     "supportsBatch": true,          // If false, GraphQL query batches will be broken up and processed in parallel. If true, they are batch processed.
   },
