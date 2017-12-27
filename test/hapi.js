@@ -1,4 +1,4 @@
-const hapi = require('hapi');
+const Hapi = require('hapi');
 const {graphqlHapi} = require('apollo-server-hapi');
 
 const {assert} = require('chai');
@@ -8,37 +8,46 @@ const {testEngine} = require('./test');
 
 describe('hapi middleware', () => {
   let server;
-  beforeEach(() => {
-    server = new hapi.Server();
-    server.connection({
-      host: 'localhost',
-      port: 0
-    });
 
-    server.route({
-      method: 'OPTIONS',
-      path: '/graphql',
-      handler: (req, reply) => {
-        return reply('ok');
-      }
-    });
-    server.register({
-      register: graphqlHapi,
-      options: {
+  async function StartServer() {
+      server = new Hapi.server({
+          host: 'localhost',
+          port: 0,
+      });
+
+      await server.register({
+          plugin: graphqlHapi,
+          options: {
+              path: '/graphql',
+              graphqlOptions: {
+                  schema,
+                  rootValue,
+                  tracing: true,
+              },
+          },
+      });
+
+      server.route({
+        method: 'OPTIONS',
         path: '/graphql',
-        graphqlOptions: {
-          schema: schema,
-          rootValue: rootValue,
-          tracing: true
+        handler: (req, h) => {
+          return 'ok';
         }
-      },
-    });
-  });
+      });
+
+      try {
+          await server.start();
+      } catch (err) {
+          console.log(`Error while starting server: ${err.message}`);
+      }
+
+      console.log(`Server running at: ${server.info.uri}`);
+  }
 
   describe('without engine', () => {
     let url;
     beforeEach(async () => {
-      await server.start();
+      await StartServer();
       url = `http://localhost:${server.info.port}/graphql`;
     });
 
@@ -59,7 +68,7 @@ describe('hapi middleware', () => {
   describe('with engine', () => {
     let url, engine;
     beforeEach(async () => {
-      await server.start();
+      await StartServer();
 
       let port = server.info.port;
       url = `http://localhost:${port}/graphql`;

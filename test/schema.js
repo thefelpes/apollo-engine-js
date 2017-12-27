@@ -87,6 +87,7 @@ exports.verifyEndpointError = (url) => {
       json: true,
       body: {'query': '{ errorTrigger }'}
     }, (err, response, body) => {
+      console.log('status code for hapi endpoint error', response.statusCode);
       assert.strictEqual(200, response.statusCode);
       assert.strictEqual('Kaboom', body['errors'][0]['message']);
       resolve();
