@@ -19,14 +19,13 @@ exports.rootValue = {
 };
 
 
-exports.verifyEndpointSuccess = async (url, hasTracing) => {
+exports.verifyEndpointSuccess = (url, hasTracing) => {
   return new Promise((resolve) => {
     request.post({
       url,
       json: true,
       body: {'query': '{ hello }'}
     }, (err, response, body) => {
-      console.log('body', body);
       assert.strictEqual('Hello World', body['data']['hello']);
       if (hasTracing) {
         assert.notEqual(undefined, body['extensions'] && body['extensions']['tracing']);

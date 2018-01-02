@@ -27,12 +27,6 @@ describe('hapi middleware', () => {
           },
       });
 
-      const hapiBodyParser = require('hapi-bodyparser');
-      hapiBodyParser.register.attributes.name = 'hapiBodyParser';
-      await server.register({
-        register: hapiBodyParser.register,
-      });
-
       server.route({
         method: 'OPTIONS',
         path: '/graphql',
@@ -74,7 +68,6 @@ describe('hapi middleware', () => {
   describe('with engine', () => {
     let url, engine;
     beforeEach(async () => {
-      console.log('before each');
       await StartServer();
       url = `http://localhost:${server.info.port}/graphql`;
 
@@ -86,7 +79,6 @@ describe('hapi middleware', () => {
     });
 
     afterEach(async () => {
-      console.log('after each');
       engine.stop();
     });
 
