@@ -6,10 +6,12 @@ exports.testEngine = (path) => {
   return new Engine({
     endpoint: path,
     engineConfig: {
-      apiKey: 'faked',
       logging: {
         level: 'warn'
       },
+      reporting: {
+        disabled: true
+      }
     },
     graphqlPort: 1,
     frontend: {
