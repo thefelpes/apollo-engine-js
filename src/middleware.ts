@@ -79,7 +79,9 @@ export function instrumentHapi(server: Server, params: MiddlewareParams) {
         if (!path || path !== params.endpoint) return h.continue;
         else if (req.method !== 'get' && req.method !== 'post') return h.continue;
         else if (req.headers['x-engine-from'] === params.psk) return h.continue;
-        else { 
+        else {
+            // The error is somewhere in this step. If we dig into how proxyRequest
+            // is violating Hapi's expectations, we'll be good to go.
             proxyRequest(params, req.raw.req, req.raw.res);
             return h.continue;
         }
