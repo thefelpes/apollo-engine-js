@@ -81,7 +81,6 @@ export function instrumentHapi(server: Server, params: MiddlewareParams) {
         else if (req.headers['x-engine-from'] === params.psk) return h.continue;
         else { 
             proxyRequest(params, req.raw.req, req.raw.res);
-            return h.continue;
         }
     });
 }
