@@ -23,6 +23,7 @@
     "npm": ">=4.0"
   },
   "dependencies": {
+    "hapi-bodyparser": "^1.0.2",
     "request": "^2.81.0",
     "stream-json": "^0.5.2"
   },
