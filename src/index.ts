@@ -217,11 +217,11 @@ export class Engine extends EventEmitter {
         childConfig.logging.destination = 'STDOUT';
 
         // Inject frontend, that we will route
-        const frontend = Object.assign({}, this.frontendParams, {
+        const frontend = Object.assign({}, {
             host: '127.0.0.1',
             endpoint,
             port: 0,
-        });
+        }, this.frontendParams);
         if (typeof childConfig.frontends === 'undefined') {
             childConfig.frontends = [frontend];
         } else {
