@@ -123,6 +123,25 @@ describe('engine', () => {
       }).listen(0)
     });
 
+    it('can be configured in single proxy mode', async () => {
+      // When using singleProxy the middleware is not required
+      let port = gqlServer('/graphql');
+
+      engine = new Engine({
+        endpoint: '/graphql',
+        engineConfig: 'test/engine.json',
+        graphqlPort: port,
+        frontend: {
+          host: '127.0.0.1',
+          port: 3000,
+          endpoint: '/graphql'
+        }
+      });
+
+      await engine.start();
+      return verifyEndpointSuccess('http://localhost:3000/graphql', false);
+    });
+
     it('sets default startup timeout', () => {
       engine = new Engine({
         graphqlPort: 1,
