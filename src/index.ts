@@ -46,14 +46,22 @@ export interface OriginParams {
     requestTimeout?: string,
     maxConcurrentRequests?: number,
     supportsBatch?: boolean,
+    http?: OriginHttpParams,
+}
+
+export interface OriginHttpParams {
+    trustedCertificates?: string,
+    disableCertificateCheck?: boolean,
+}
+
+export interface OriginHttpConfig extends OriginHttpParams {
+    url: string,
+    headerSecret: string,
 }
 
 // All configuration of "origin"  (including fields managed by apollo-engine-js)
 export interface OriginConfig extends OriginParams {
-    http: {
-        url: string,
-        headerSecret: string,
-    }
+    http?: OriginHttpConfig
 }
 
 export interface EngineConfig {
@@ -221,12 +229,18 @@ export class Engine extends EventEmitter {
         }
 
         if (typeof childConfig.origins === 'undefined') {
-            const origin = Object.assign({}, this.originParams, {
-                http: {
+            const origin = Object.assign({}, this.originParams) as OriginConfig;
+            if (typeof origin.http === 'undefined') {
+                origin.http = {
                     url: 'http://127.0.0.1:' + graphqlPort + endpoint,
                     headerSecret: this.middlewareParams.psk
-                },
-            });
+                };
+            } else {
+                Object.assign(origin.http, {
+                    url: 'http://127.0.0.1:' + graphqlPort + endpoint,
+                    headerSecret: this.middlewareParams.psk
+                });
+            }
             childConfig.origins = [origin];
         } else {
             // Extend any existing HTTP origins with the chosen PSK:
@@ -331,7 +345,7 @@ export class Engine extends EventEmitter {
         spawnChild();
 
         return new Promise((resolve, reject) => {
-            let cancelTimeout : NodeJS.Timer;
+            let cancelTimeout: NodeJS.Timer;
             if (this.startupTimeout > 0) {
                 cancelTimeout = setTimeout(() => {
                     this.running = false;

@@ -76,13 +76,13 @@ describe('engine', () => {
 
         // Setup engine, with an extra frontend on that port:
         let engineConfig = {
-          apiKey: 'faked',
           frontends: [{
             host: '127.0.0.1',
             endpoint: '/graphql',
             port: extraPort
           }],
           reporting: {
+            disabled: true,
             noTraceVariables: true
           }
         };
@@ -136,7 +136,26 @@ describe('engine', () => {
         startupTimeout: 0,
       });
       assert.strictEqual(engine.startupTimeout, 0);
-    })
+    });
+
+    it('accepts origin TLS configuration', async () => {
+      engine = new Engine({
+        graphqlPort: 1,
+        origin: {
+          http: {
+            disableCertificateCheck: true,
+          }
+        },
+        engineConfig: {
+          reporting: {
+            disabled: true
+          }
+        }
+      });
+
+      await engine.start();
+      // No good way to verify this propagated to the binary's config
+    });
   });
 
   describe('process', () => {
