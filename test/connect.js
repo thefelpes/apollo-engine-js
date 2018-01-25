@@ -9,14 +9,15 @@ const {testEngine} = require('./test');
 
 describe('connect middleware', () => {
   let app;
+  const endpoint = '/graphql';
   beforeEach(() => {
     app = new connect()
       .use(query());
   });
 
   function gqlServer() {
-    app.use('/graphql', bodyParser.json());
-    app.use('/graphql', graphqlConnect({
+    app.use(endpoint, bodyParser.json());
+    app.use(endpoint, graphqlConnect({
       schema,
       rootValue,
       tracing: true
@@ -28,7 +29,7 @@ describe('connect middleware', () => {
     let url;
     beforeEach(() => {
       let server = gqlServer();
-      url = `http://localhost:${server.address().port}/graphql`;
+      url = `http://localhost:${server.address().port}${endpoint}`;
     });
 
     it('processes successful query', () => {
@@ -53,7 +54,7 @@ describe('connect middleware', () => {
       const server = gqlServer();
       engine.graphqlPort = server.address().port;
       await engine.start();
-      url = `http://localhost:${engine.graphqlPort}/graphql`;
+      url = `http://localhost:${engine.graphqlPort}${endpoint}`;
     });
 
     afterEach(() => {
@@ -78,11 +79,11 @@ describe('connect middleware', () => {
     let url, engine;
     beforeEach(async () => {
       engine = testEngine();
-      app.use('/graphql', engine.connectMiddleware());
+      app.use(endpoint, engine.connectMiddleware());
       const server = gqlServer();
       engine.graphqlPort = server.address().port;
       await engine.start();
-      url = `http://localhost:${engine.graphqlPort}/graphql`;
+      url = `http://localhost:${engine.graphqlPort}${endpoint}`;
     });
 
     afterEach(() => {

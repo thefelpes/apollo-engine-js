@@ -12,6 +12,12 @@ export class MiddlewareParams {
     public dumpTraffic: boolean;
 }
 
+// Matches the strict endpoint, the endpoint followed by one forward-slash, the endpoint
+// followed by a question mark and then anything else, and the endpoint followed by one backslash
+function getEndpointRegex(endpoint: string) : RegExp {
+    return new RegExp(`^${endpoint}(\\/?$|\\?.*|\\\\)`)
+}
+
 export function makeMicroMiddleware(params: MiddlewareParams) {
     return function(fn: Function) {
         return function (req: IncomingMessage, res: ServerResponse) {
@@ -25,7 +31,7 @@ export function makeMicroMiddleware(params: MiddlewareParams) {
 }
 
 export function makeExpressMiddleware(params: MiddlewareParams) {
-    const endpointRegex = new RegExp(`^${params.endpoint}(\\?|$)`);
+    const endpointRegex = getEndpointRegex(params.endpoint);
     return function (req: Request, res: Response, next: NextFunction) {
         if (!params.uri || !endpointRegex.test(req.originalUrl)) next();
         else if (req.method !== 'GET' && req.method !== 'POST') next();
@@ -38,7 +44,7 @@ export function makeExpressMiddleware(params: MiddlewareParams) {
 }
 
 export function makeConnectMiddleware(params: MiddlewareParams) {
-    const endpointRegex = new RegExp(`^${params.endpoint}(\\?|$)`);
+    const endpointRegex = getEndpointRegex(params.endpoint);
     return function (req: any, res: any, next: any) {
         if (!params.uri || !endpointRegex.test(req.originalUrl)) next();
         else if (req.method !== 'GET' && req.method !== 'POST') next();
