@@ -27,9 +27,9 @@
     "stream-json": "^0.5.2"
   },
   "optionalDependencies": {
-    "apollo-engine-binary-darwin": "0.2018.01-17-g9c203510f",
-    "apollo-engine-binary-linux": "0.2018.01-17-g9c203510f",
-    "apollo-engine-binary-windows": "0.2018.01-17-g9c203510f"
+    "apollo-engine-binary-darwin": "0.2018.1-17-g9c203510f",
+    "apollo-engine-binary-linux": "0.2018.1-17-g9c203510f",
+    "apollo-engine-binary-windows": "0.2018.1-17-g9c203510f"
   },
   "devDependencies": {
     "@types/express": "^4.0.36",
