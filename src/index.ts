@@ -52,6 +52,9 @@ export interface OriginParams {
 export interface OriginHttpParams {
     trustedCertificates?: string,
     disableCertificateCheck?: boolean,
+    overrideRequestHeaders?: {
+        [headerName: string]: string
+    }
 }
 
 export interface OriginHttpConfig extends OriginHttpParams {

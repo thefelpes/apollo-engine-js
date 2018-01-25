@@ -175,6 +175,30 @@ describe('engine', () => {
       await engine.start();
       // No good way to verify this propagated to the binary's config
     });
+
+    it('accepts configuration of overridden headers', async () => {
+      const overrideRequestHeaders = {
+        "Host": "example.com",
+        "X-Does-Not-Exist": "huehue"
+      };
+      engine = new Engine({
+        graphqlPort: 1,
+        origin: {
+          http: {
+            overrideRequestHeaders: overrideRequestHeaders
+          }
+        },
+        engineConfig: {
+          reporting: {
+            disabled: true
+          }
+        }
+      });
+
+      for (var key in overrideRequestHeaders) {
+        assert.strictEqual(engine.originParams.http.overrideRequestHeaders[key], overrideRequestHeaders[key]);
+      }
+    });
   });
 
   describe('process', () => {

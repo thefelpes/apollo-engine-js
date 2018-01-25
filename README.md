@@ -67,6 +67,10 @@ This is the minimum necessary information in the engine configuration object to 
     "requestTimeout": "5s",          // Time to wait for the Node server to respond to the Engine Proxy.
     "maxConcurrentRequests": 9999,  // The maximum number of concurrent GraphQL requests to make back to the Node server.
     "supportsBatch": true,          // If false, GraphQL query batches will be broken up and processed in parallel. If true, they are batch processed.
+    "overrideRequestHeaders": {     // Headers to replace or add in requests to your origin. May be useful for virtually-hosted GraphQL servers.
+      "Host": "127.0.0.1:8080",
+      "X-New-Header": "xxxxxxxxx"
+    }
   },
 
   // Shortcut to "frontends" in EngineConfig
